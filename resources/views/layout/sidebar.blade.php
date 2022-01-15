@@ -1,4 +1,4 @@
-<div id="sidebar" class="active">
+<div id="sidebar">
     <div class="sidebar-wrapper active">
         <div class="sidebar-header">
             <div style="height:100px;background: url('/storage/img/core/annahl.png') no-repeat center;background-size: contain">
@@ -55,12 +55,12 @@
 
                 <li class='sidebar-title'>Wali Kelas</li>
 
-                <li class="sidebar-item {{ request()->is('guardian/home*') ? 'active' : '' }}" id="home">
-                    <a href="/guardian/home" class='sidebar-link'>
-                        <i data-feather="home" width="20"></i>
-                        <span>Beranda</span>
-                    </a>
-                </li>
+                {{-- <li class="sidebar-item {{ request()->is('guardian/home*') ? 'active' : '' }}" id="home">
+                <a href="/guardian/home" class='sidebar-link'>
+                    <i data-feather="home" width="20"></i>
+                    <span>Beranda</span>
+                </a>
+                </li> --}}
 
                 <li class="sidebar-item {{ request()->is('guardian/competences*') ? 'active' : '' }}">
                     <a href="/guardian/competences" class='sidebar-link'>
@@ -111,6 +111,13 @@
                     </ul>
                 </li>
 
+                <li class="sidebar-item {{ request()->is('guardian/students*') ? 'active' : '' }}">
+                    <a href="/guardian/students" class='sidebar-link'>
+                        <i data-feather="user" width="20"></i>
+                        <span>Siswa</span>
+                    </a>
+                </li>
+
                 {{-- <li class="sidebar-item has-sub" id="raports">
                     <a href="#" class='sidebar-link'>
                         <i data-feather="book-open" width="20"></i>
@@ -132,12 +139,12 @@
 
                 <li class='sidebar-title'>Operator</li>
 
-                <li class="sidebar-item {{ request()->is('operator/home*') ? 'active' : '' }}" id="home">
-                    <a href="/operator/home" class='sidebar-link'>
-                        <i data-feather="home" width="20"></i>
-                        <span>Beranda</span>
-                    </a>
-                </li>
+                {{-- <li class="sidebar-item {{ request()->is('operator/home*') ? 'active' : '' }}" id="home">
+                <a href="/operator/home" class='sidebar-link'>
+                    <i data-feather="home" width="20"></i>
+                    <span>Beranda</span>
+                </a>
+                </li> --}}
 
                 <li class="sidebar-item {{ request()->is('operator/competences*') ? 'active' : '' }}">
                     <a href="/operator/competences" class='sidebar-link'>
@@ -168,7 +175,7 @@
                     </ul>
                 </li>
 
-                <li class="sidebar-item has-sub {{ request()->is('daftar/students*') || request()->is('daftar/guardians*') ? 'active' : '' }}" id="lists">
+                <li class="sidebar-item has-sub {{ request()->is('daftar/students*') || request()->is('daftar/guardians*') ? 'active' : '' }}">
                     <a href="#" class='sidebar-link'>
                         <i data-feather="book-open" width="20"></i>
                         <span>Daftar</span>
@@ -183,7 +190,7 @@
                     </ul>
                 </li>
 
-                <li class="sidebar-item has-sub {{ request()->is('user*') ? 'active' : '' }}" id="lists">
+                <li class="sidebar-item has-sub {{ request()->is('user*') ? 'active' : '' }}">
                     <a href="#" class='sidebar-link'>
                         <i data-feather="user" width="20"></i>
                         <span>Akun</span>
@@ -197,6 +204,21 @@
                         </li>
                     </ul>
                 </li>
+
+                <li class="sidebar-item has-sub {{ request()->is('operator/attendance*') || request()->is('calendar*') ? 'active' : '' }}">
+                    <a href="#" class='sidebar-link'>
+                        <i data-feather="airplay" width="20"></i>
+                        <span>Absensi</span>
+                    </a>
+                    <ul class="submenu">
+                        <li>
+                            <a href="/operator/attendance">Daftar Hadir</a>
+                        </li>
+                        <li>
+                            <a href="/calendar">Kalender</a>
+                        </li>
+                    </ul>
+                </li>
                 @endcan
 
                 {{-- Admin --}}
@@ -204,7 +226,7 @@
                 @can('admin')
                 <li class='sidebar-title'>Admin</li>
 
-                <li class="sidebar-item has-sub {{ request()->is('database/students*') || request()->is('database/teachers*') ? 'active' : '' }}" id="lists">
+                <li class="sidebar-item has-sub {{ request()->is('database/students*') || request()->is('database/teachers*') ? 'active' : '' }}">
                     <a href="#" class='sidebar-link'>
                         <i data-feather="database" width="20"></i>
                         <span>Database</span>
@@ -226,7 +248,7 @@
                     </a>
                 </li>
 
-                <li class="sidebar-item has-sub {{ request()->is('grades*') || request()->is('subGrades*') ? 'active' : '' }}" id="lists">
+                <li class="sidebar-item has-sub {{ request()->is('grades*') || request()->is('subGrades*') ? 'active' : '' }}">
                     <a href="#" class='sidebar-link'>
                         <i data-feather="trello" width="20"></i>
                         <span>Kelas</span>
@@ -241,12 +263,20 @@
                     </ul>
                 </li>
 
+
                 <li class="sidebar-item {{ request()->is('versions*') ? 'active' : '' }}">
                     <a href="/versions" class='sidebar-link'>
                         <i data-feather="hash" width="20"></i>
                         <span>Versi</span>
                     </a>
                 </li>
+
+                {{-- <li class="sidebar-item {{ request()->is('identity*') ? 'active' : '' }}">
+                <a href="/identity" class='sidebar-link'>
+                    <i data-feather="hash" width="20"></i>
+                    <span>Identitas</span>
+                </a>
+                </li> --}}
 
                 @endcan
 

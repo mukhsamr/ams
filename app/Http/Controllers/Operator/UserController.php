@@ -73,7 +73,7 @@ class UserController extends Controller
     {
         $user = User::find($request->id);
         try {
-            $user->update($request->validated());
+            $user->update($request->input());
             $user->subGrade()->sync($request->subGrade);
             $user->subject()->sync($request->subject);
             $alert['type'] = 'success';

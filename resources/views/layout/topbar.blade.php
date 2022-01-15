@@ -4,9 +4,45 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+        @if(session('holiday'))
+        <span class="badge bg-danger ms-3">{{ session('event') }}</span>
+        @else
+
+        @if((session('isAbsen')))
+        <span class="badge bg-success ms-3"><i data-feather="check"></i></span>
+        @else
+        <button type="button" class="badge bg-warning border-0 ms-3" data-bs-toggle="modal" data-bs-target="#modalScan" {{ date('H:i:s') < session('setting')->start ? 'disabled' : '' }}>
+            Anda belum absen
+        </button>
+        @endif
+
+        @endif
+
+        <div class="modal fade" id="modalScan" tabindex="-1" aria-labelledby="modalScanLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div id="reader"></div>
+                        <strong id="message"></strong>
+                        <div id="data"></div>
+                    </div>
+                    <button class="btn btn-primary rounded-0" id="scan">Scan</button>
+                </div>
+            </div>
+        </div>
+
+        <form action="/attendance/qrcode" method="post" id="attendance">
+            @csrf
+            <input type="hidden" name="id" value="{{ auth()->user()->id }}">
+            <input type="hidden" name="qrcode" id="qrcode">
+        </form>
+
+
         <ul class="navbar-nav d-flex align-items-center navbar-light ms-auto">
+
             {{-- <li class="dropdown nav-icon">
-                <a href="#" data-bs-toggle="dropdown" class="nav-link  dropdown-toggle nav-link-lg nav-link-user">
+                <a href="#" data-bs-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user text-danger">
                     <div class="d-lg-inline-block">
                         <i data-feather="bell"></i>
                     </div>
@@ -27,8 +63,8 @@
                         </li>
                     </ul>
                 </div>
-            </li>
-            <li class="dropdown nav-icon me-2">
+            </li> --}}
+            {{-- <li class="dropdown nav-icon me-2">
                 <a href="#" data-bs-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                     <div class="d-lg-inline-block">
                         <i data-feather="mail"></i>
@@ -50,14 +86,17 @@
                     </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end">
-                    {{-- <a class="dropdown-item" href="/profil"><i data-feather="user"></i> Profil</a> --}}
-                    {{-- <a class="dropdown-item" href="#"><i data-feather="mail"></i> Messages</a>
-                    <a class="dropdown-item" href="#"><i data-feather="settings"></i> Settings</a> --}}
-                    {{-- <div class="dropdown-divider"></div> --}}
+                    {{-- <a class="dropdown-item" href="/profil"><i data-feather="user"></i> Profil</a>
+                    <a class="dropdown-item" href="#"><i data-feather="mail"></i> Messages</a>
+                    <a class="dropdown-item" href="#"><i data-feather="settings"></i> Settings</a>
+                    <div class="dropdown-divider"></div> --}}
                     <a class="dropdown-item" href="{{ route('logout') }}"><i data-feather="log-out"></i> Logout</a>
-
                 </div>
             </li>
         </ul>
     </div>
 </nav>
+
+@push('scripts')
+<script src="{{ asset('js/qrcode.js') }}"></script>
+@endpush

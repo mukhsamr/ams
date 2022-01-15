@@ -17,7 +17,7 @@ class CreateStudentsTable extends Migration
             $table->id();
             $table->string('nama');
             $table->string('nipd')->unique();
-            $table->enum('jenis_kelamin', ['L', 'P']);
+            $table->enum('jenis_kelamin', ['L', 'P'])->nullable();
             $table->string('nisn')->unique();
             $table->string('tempat_lahir')->nullable();
             $table->date('tanggal_lahir')->nullable();

@@ -42,7 +42,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="username">Password</label>
-                                <input type="password" name="password" id="password-add" class="form-control form-control-sm" minlength="5" readonly required>
+                                <input type="password" name="password" id="password-add" class="form-control form-control-sm" minlength="5" disabled required>
                                 <input type="checkbox" class="form-check-input" types="default" id="default-add" data-id="add" checked>
                                 <label class="form-check-label" for="default-add">
                                     Default

@@ -70,12 +70,17 @@ class User extends Authenticatable
 
     public function guardian()
     {
-        return $this->hasMany(Guardian::class);
+        return $this->hasOne(Guardian::class);
     }
 
     public function userable()
     {
         return $this->morphTo();
+    }
+
+    public function attendance()
+    {
+        return $this->hasMany(Attendance::class);
     }
 
     public function getSubject()

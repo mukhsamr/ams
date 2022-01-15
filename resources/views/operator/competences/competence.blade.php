@@ -8,25 +8,25 @@
 </div>
 
 <hr>
-
 <section class="section">
-    <div class="d-flex justify-content-between mb-3">
-        <form action="/operator/competences" method="get" class="d-flex" id="search-competences">
-            <select name="subject" class="form-select form-select-sm w-auto me-2" id="subject">
-                @foreach($subjects as $subject)
-                <option value="{{ $subject->id }}" {{ $selected['subject']==$subject->id ? 'selected' : '' }}>{{
-                    $subject->subject }}</option>
-                @endforeach
-            </select>
-            <select name="grade_id" class="form-select form-select-sm w-auto" id="grade">
-                <option hidden></option>
-                @foreach($grades as $grade)
-                <option value="{{ $grade->id }}" {{ $selected['grade'] == $grade->id ? 'selected' : '' }}>{{ $grade->grade }}</option>
-                @endforeach
-            </select>
-        </form>
-
-        <div>
+    <div class="row g-1 mb-2">
+        <div class="col12 col-md-6 order-2 order-md-0">
+            <form action="/operator/competences" method="get" class="d-flex" id="search-competences">
+                <select name="subject" class="form-select form-select-sm w-auto me-2" id="subject">
+                    @foreach($subjects as $subject)
+                    <option value="{{ $subject->id }}" {{ $selected['subject']==$subject->id ? 'selected' : '' }}>{{
+                        $subject->subject }}</option>
+                    @endforeach
+                </select>
+                <select name="grade_id" class="form-select form-select-sm w-auto" id="grade">
+                    <option hidden></option>
+                    @foreach($grades as $grade)
+                    <option value="{{ $grade->id }}" {{ $selected['grade'] == $grade->id ? 'selected' : '' }}>{{ $grade->grade }}</option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
+        <div class="col12 col-md-6 order-1 order-md-0 text-md-end">
             <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#add-competence">
                 <i data-feather="plus"></i>
             </button>
@@ -150,8 +150,8 @@
                 </div>
             </div>
         </div>
-
     </div>
+
 
     @if($alert = session('alert'))
     <x-alert :type="$alert['type']" :message="$alert['message']" />

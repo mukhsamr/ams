@@ -35,4 +35,7 @@ $(document).ready(function () {
         const size = (this.files[0].size / 1000) + ' kb';
         $('#size').text(size);
     });
+
+    // Toogle sidebar device
+    if (screen.width >= 992) $('#sidebar').addClass('active');
 });

@@ -10,23 +10,24 @@
 <hr>
 
 <section class="section">
-    <div class="d-flex justify-content-between mb-3">
-        <form action="/teacher/competences" method="get" class="d-flex" id="search-competences">
-            <select name="subject" class="form-select form-select-sm w-auto me-2" id="subject">
-                @foreach($subjects as $subject)
-                <option value="{{ $subject->id }}" {{ $selected['subject'] == $subject->id ? 'selected' : '' }}>{{
-                    $subject->subject }}</option>
-                @endforeach
-            </select>
-            <select name="grade_id" class="form-select form-select-sm w-auto" id="grade">
-                <option hidden></option>
-                @foreach($grades as $grade)
-                <option value="{{ $grade->id }}" {{ $selected['grade'] == $grade->id ? 'selected' : '' }}>{{ $grade->grade }}</option>
-                @endforeach
-            </select>
-        </form>
-
-        <div>
+    <div class="row g-1 mb-2">
+        <div class="col-12 col-md-6 order-2 order-md-0">
+            <form action="/teacher/competences" method="get" class="d-flex" id="search-competences">
+                <select name="subject" class="form-select form-select-sm w-auto me-2" id="subject">
+                    @foreach($subjects as $subject)
+                    <option value="{{ $subject->id }}" {{ $selected['subject'] == $subject->id ? 'selected' : '' }}>{{
+                        $subject->subject }}</option>
+                    @endforeach
+                </select>
+                <select name="grade_id" class="form-select form-select-sm w-auto" id="grade">
+                    <option hidden></option>
+                    @foreach($grades as $grade)
+                    <option value="{{ $grade->id }}" {{ $selected['grade'] == $grade->id ? 'selected' : '' }}>{{ $grade->grade }}</option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
+        <div class="col-12 col-md-6 order-1 order-md-0 text-md-end">
             <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#add-competence">
                 <i data-feather="plus"></i>
             </button>
@@ -41,7 +42,7 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row g-2">
-                                    <div class="col-6">
+                                    <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="competence">Kode</label>
                                             <div class="input-group">
@@ -53,7 +54,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="subject">Pelajaran</label>
                                             <select name="subject_id" class="form-select form-select-sm" required>
@@ -202,7 +203,7 @@
                                         </div>
                                         <div class="modal-body">
                                             <div class="row g-2">
-                                                <div class="col-6">
+                                                <div class="col-12 col-md-6">
                                                     <div class="form-group">
                                                         <label for="competence">Kode</label>
                                                         <div class="input-group">
@@ -214,7 +215,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-6">
+                                                <div class="col-12 col-md-6">
                                                     <div class="form-group">
                                                         <label for="subject">Pelajaran</label>
                                                         <select name="subject_id" class="form-select form-select-sm" required>

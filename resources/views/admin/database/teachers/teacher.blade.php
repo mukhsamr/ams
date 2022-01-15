@@ -11,7 +11,12 @@
     <div class="d-flex justify-content-between mb-2">
         <form action="/database/teachers" method="get" id="search">
             <div class="input-group w-auto">
-                <input type="text" name="keyword" class="form-control form-control-sm" placeholder="Cari nama..." value="{{ request('keyword') }}">
+                <select name="field" class="form-select form-select-sm" id="field">
+                    @foreach(array_slice($columns, 0,-1) as $column)
+                    <option value="{{ $column }}" {{ $column == $field ? 'selected' : '' }}>{{ Str::headline($column) }}</option>
+                    @endforeach
+                </select>
+                <input type="text" name="keyword" class="form-control form-control-sm" placeholder="..." value="{{ request('keyword') }}">
                 <button type="submit" class="btn btn-secondary btn-sm"><i data-feather="search"></i></button>
             </div>
         </form>

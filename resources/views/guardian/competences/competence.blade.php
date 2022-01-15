@@ -34,7 +34,7 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row g-2">
-                                    <div class="col-6">
+                                    <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="competence">Kode</label>
                                             <div class="input-group">
@@ -46,7 +46,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="subject">Pelajaran</label>
                                             <select name="subject_id" class="form-select form-select-sm" required>
@@ -189,7 +189,7 @@
                                         </div>
                                         <div class="modal-body">
                                             <div class="row g-2">
-                                                <div class="col-6">
+                                                <div class="col-12 col-md-6">
                                                     <div class="form-group">
                                                         <label for="competence">Kode</label>
                                                         <div class="input-group">
@@ -201,7 +201,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-6">
+                                                <div class="col-12 col-md-6">
                                                     <div class="form-group">
                                                         <label for="subject">Pelajaran</label>
                                                         <select name="subject_id" class="form-select form-select-sm" required>

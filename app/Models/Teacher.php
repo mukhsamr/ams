@@ -19,7 +19,7 @@ class Teacher extends Model
 
     public function getNamaAttribute($value)
     {
-        return str_replace(' ', '&nbsp;', ucwords(strtolower($value)));
+        return str_replace(' ', '&nbsp;', $value);
     }
 
     public function user()

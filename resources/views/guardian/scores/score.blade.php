@@ -8,7 +8,7 @@
 </div>
 <hr>
 <section class="section">
-    <div class="d-flex justify-content-between mb-3">
+    <div class="d-flex justify-content-between mb-2">
         <form action="/teacher/scores/search" method="get" class="d-flex" id="search-score">
             <input type="hidden" name="sub_grade" value="{{ $subGrade->id }}">
             <select name="subject" class="form-select form-select-sm w-auto" id="subject" required>

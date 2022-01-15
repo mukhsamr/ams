@@ -9,7 +9,7 @@
 </div>
 <hr>
 <section class="section">
-    <div class="d-flex justify-content-between mb-3">
+    <div class="d-flex justify-content-between mb-2">
         <form action="/teacher/ledgers" method="post" class="d-flex" id="searchLedger">
             @csrf
             <select name="subject" class="form-select form-select-sm w-auto" id="subject">

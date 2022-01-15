@@ -13,7 +13,6 @@
 
 <body>
     <div id="auth">
-
         <div class="container">
             <div class="row">
                 <div class="col-md-5 col-sm-12 mx-auto">
@@ -25,9 +24,9 @@
                                 <p>Please sign in to continue to Annahl.</p>
                             </div>
 
-                            @error('fail')
-                            <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
+                            @if($alert = session('alert'))
+                            <x-alert :type="$alert['type']" :message="$alert['message']" />
+                            @endif
 
                             <form action="/login" method="POST">
                                 @csrf
@@ -50,15 +49,13 @@
                                     </div>
                                 </div>
 
-                                {{-- <div class='form-check clearfix my-4'>
+                                <div class='form-check clearfix my-2'>
                                     <div class="checkbox float-start">
-                                        <input type="checkbox" id="checkbox1" class='form-check-input'>
+                                        <input type="checkbox" name="remember" id="checkbox1" value="1" class='form-check-input'>
                                         <label for="checkbox1">Remember me</label>
                                     </div>
-                                </div> --}}
-                                <div class="clearfix">
-                                    <button type="submit" class="btn btn-primary float-end">Submit</button>
                                 </div>
+                                <button type="submit" class="btn btn-primary mt-2">Submit</button>
                             </form>
                         </div>
                     </div>
@@ -70,8 +67,10 @@
     <script src="{{ asset('storage/voler/assets/js/feather-icons.js') }}"></script>
     <script src="{{ asset('storage/voler/assets/js/feather-icons/feather.min.js') }}"></script>
     <script src="{{ asset('storage/voler/assets/js/app.js') }}"></script>
-
     <script src="{{ asset('storage/voler/assets/js/main.js') }}"></script>
+
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/login.js') }}"></script>
 </body>
 
 </html>

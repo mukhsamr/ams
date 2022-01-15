@@ -96,10 +96,10 @@ class ScoreList extends Model
                 $this->where('student_version_id', $id)->update([$column => $score]);
                 if ($columns = $fields->toArray()) {
                     $row = $this->where('student_version_id', $id);
-                    $rata2 = $this->getRataRata($row->first($columns));
+                    $rata2 = $this->getRataRata($row->first($columns)->getAttributes());
                     if ($type == 1) {
                         $update['rata_rata'] = $rata2;
-                        $nilaiAkhir = $this->getNilaiAkhir($row->first(['nilai', 'r1', 'r2'])->toArray(), $kkm);
+                        $nilaiAkhir = $this->getNilaiAkhir($row->first(['nilai', 'r1', 'r2'])->getAttributes(), $kkm);
                         $update['nilai_akhir'] = $nilaiAkhir;
                         $update['nilai_bc'] = $this->getNilaiBc($rata2, $nilaiAkhir);
                         $update['keterangan'] = $update['nilai_bc'] !== null ? $update['nilai_bc'] >= $kkm : null;

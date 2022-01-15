@@ -8,25 +8,25 @@
 </div>
 
 <hr>
-
 <section class="section">
-    <div class="d-flex justify-content-between mb-3">
-        <form action="/operator/journals" id="search-journals" class="d-flex">
-            <select name="subject" class="form-select form-select-sm w-auto">
-                <option value="0" {{ $selected['subject'] == '0' ? 'selected' : '' }}>Semua</option>
-                @foreach($subjects as $subject)
-                <option value="{{ $subject->id }}" {{ $subject->id == $selected['subject'] ? 'selected' : '' }}>{{ $subject->subject }}</option>
-                @endforeach
-            </select>
-            <select name="sub_grade" class="form-select form-select-sm w-auto ms-2">
-                <option value="0" {{ $selected['subGrade'] == '0' ? 'selected' : '' }}>Semua</option>
-                @foreach($subGrades as $subGrade)
-                <option value="{{ $subGrade->id }}" {{ $subGrade->id == $selected['subGrade'] ? 'selected' : '' }}>{{ $subGrade->sub_grade }}</option>
-                @endforeach
-            </select>
-        </form>
-
-        <div class="d-flex">
+    <div class="row g-1 mb-2">
+        <div class="col-12 col-md-6 order-2 order-md-0">
+            <form action="/operator/journals" id="search-journals" class="d-flex">
+                <select name="subject" class="form-select form-select-sm w-auto">
+                    <option value="0" {{ $selected['subject'] == '0' ? 'selected' : '' }}>Semua</option>
+                    @foreach($subjects as $subject)
+                    <option value="{{ $subject->id }}" {{ $subject->id == $selected['subject'] ? 'selected' : '' }}>{{ $subject->subject }}</option>
+                    @endforeach
+                </select>
+                <select name="sub_grade" class="form-select form-select-sm w-auto ms-2">
+                    <option value="0" {{ $selected['subGrade'] == '0' ? 'selected' : '' }}>Semua</option>
+                    @foreach($subGrades as $subGrade)
+                    <option value="{{ $subGrade->id }}" {{ $subGrade->id == $selected['subGrade'] ? 'selected' : '' }}>{{ $subGrade->sub_grade }}</option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
+        <div class="col-6 col-md-1 order-12 order-md-0 text-md-end">
             <form action="/operator/journals/export/{{ $selected['subject'] ?? 0 }}/{{ $selected['subGrade'] ?? 0 }}" method="post">
                 @csrf
                 <button type="submit" class="btn btn-dark btn-sm" onclick="return confirm('Download jurnal?')">

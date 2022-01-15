@@ -63,7 +63,7 @@ class JournalImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
         $type = $explode[0] == '3' ? 1 : 2;
         $competence = Competence::where('competence', $explode[1])->where('type', $type)->where('subject_id', $this->subject_id)->first();
 
-        $data['tanggal'] = $this->transformDate($data['tanggal'])->toDateString();
+        $data['tanggal'] = $this->transformDate($data['tanggal']);
         $data['kompetensi'] = $competence ? $competence->id : null;
         return $data;
     }
@@ -85,9 +85,13 @@ class JournalImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
     public function transformDate($value, $format = 'Y-m-d')
     {
         try {
-            return Carbon::instance(Date::excelToDateTimeObject($value));
+            return Carbon::instance(Date::excelToDateTimeObject($value))->toDateString();
         } catch (\ErrorException $e) {
-            return Carbon::createFromFormat($format, $value);
+            try {
+                return Carbon::createFromFormat($format, $value)->toDateString();
+            } catch (\Throwable $th) {
+                return null;
+            }
         }
     }
 

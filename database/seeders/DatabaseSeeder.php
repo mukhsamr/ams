@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             SocialSeeder::class,
             EkskulSeeder::class,
             PersonalitySeeder::class,
+            AttendanceSettingSeeder::class,
             VersionSeeder::class,
 
             DevSeeder::class,

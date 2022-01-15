@@ -34,8 +34,8 @@ class HomeController extends Controller
             $competence = $score->competence->format_competence;
             $competences[] = $competence;
             $finished[$competence] = [
-                'success' => $lists->where('keterangan', 1)->count(),
-                'fail' => $lists->where('keterangan', 0)->count()
+                'success' => $lists->whereStrict('keterangan', 1)->count(),
+                'fail' => $lists->whereStrict('keterangan', 0)->count()
             ];
 
             foreach ($lists as $list) {
@@ -55,6 +55,7 @@ class HomeController extends Controller
             ];
         }
 
+        // dd($json);
         $data = [
             'subjects' => $subject,
             'subGrades' => $subGrade,

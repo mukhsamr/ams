@@ -110,8 +110,8 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary btn-sm me-auto" data-bs-dismiss="modal">Tutup</button>
-                            <button type="submit" class="btn btn-primary btn-sm" id="btn-submit">Simpan</button>
+                            <button type="button" class="btn btn-secondary me-auto" data-bs-dismiss="modal">Tutup</button>
+                            <button type="submit" class="btn btn-primary" id="btn-submit">Simpan</button>
                         </div>
                     </form>
                 </div>

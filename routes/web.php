@@ -5,7 +5,7 @@ use App\Http\Controllers\Teacher;
 use App\Http\Controllers\Guardian;
 use App\Http\Controllers\Operator;
 use App\Http\Controllers\Admin;
-use App\Http\Controllers\IdentityController;
+use App\Http\Controllers\AttendanceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,11 +20,29 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Default
-Route::get('/', [IdentityController::class, 'index']);
+Route::get('/', function () {
+    $level = auth()->user()->level;
+    if ($level === '0') {
+        $route = 'dev';
+    } elseif ($level == 1) {
+        $route = 'studentHome';
+    } else {
+        $route = 'teacherHome';
+    }
 
-// Profil
-Route::get('/profil', function () {
-    return view('profil.profil');
+    return redirect(route($route));
+})->middleware('auth', 'attendance');
+
+// // Profil
+// Route::get('/profil', function () {
+//     return view('profil.profil');
+// });
+
+// Attendance
+Route::middleware(['auth', 'attendance'])->prefix('attendance')->group(function () {
+    Route::get('/', [AttendanceController::class, 'index']);
+    Route::post('qrcode', [AttendanceController::class, 'qrcode']);
+    Route::post('barcode', [AttendanceController::class, 'barcode']);
 });
 
 // Login
@@ -35,7 +53,7 @@ Route::prefix('login')->group(function () {
 });
 
 // === Teacher ===
-Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->group(function () {
+Route::middleware(['auth', 'attendance', 'role:teacher'])->prefix('teacher')->group(function () {
     // Home
     Route::prefix('home')->group(function () {
         Route::get('/', [Teacher\HomeController::class, 'index'])->name('teacherHome');
@@ -85,7 +103,7 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->group(function (
 });
 
 // === Guardian ===
-Route::middleware(['auth', 'role:guardian'])->prefix('guardian')->group(function () {
+Route::middleware(['auth', 'attendance', 'role:guardian'])->prefix('guardian')->group(function () {
     // Home
     Route::get('home', function () {
         return view('guardian.home.home');
@@ -136,6 +154,11 @@ Route::middleware(['auth', 'role:guardian'])->prefix('guardian')->group(function
         Route::put('/', [Guardian\SocialController::class, 'update']);
     });
 
+    // Students
+    Route::prefix('students')->group(function () {
+        Route::get('/', [Guardian\StudentController::class, 'index']);
+    });
+
     // Route::prefix('raports')->group(function () {
     //     Route::get('pts', function () {
     //         return view('guardian.raports.pts');
@@ -144,7 +167,7 @@ Route::middleware(['auth', 'role:guardian'])->prefix('guardian')->group(function
 });
 
 // === Operator ===
-Route::middleware(['auth', 'role:operator'])->group(function () {
+Route::middleware(['auth', 'attendance', 'role:operator'])->group(function () {
 
     Route::prefix('operator')->group(function () {
 
@@ -176,6 +199,25 @@ Route::middleware(['auth', 'role:operator'])->group(function () {
             Route::get('/', [Operator\LedgerController::class, 'index']);
             Route::post('/', [Operator\LedgerController::class, 'show']);
         });
+
+        // Attendance
+        Route::prefix('attendance')->group(function () {
+            Route::get('/', [Operator\AttendanceController::class, 'index']);
+            Route::post('setting', [Operator\AttendanceController::class, 'setting']);
+            Route::get('qrcode', [Operator\AttendanceController::class, 'qrcode']);
+            Route::put('qrcode', [Operator\AttendanceController::class, 'updateQrcode']);
+            Route::put('/', [Operator\AttendanceController::class, 'update']);
+            Route::post('export', [Operator\AttendanceController::class, 'export']);
+        });
+    });
+
+    // Calendar
+    Route::prefix('calendar')->group(function () {
+        Route::get('/', [Operator\CalendarController::class, 'index'])->name('calendar');
+        Route::post('api', [Operator\CalendarController::class, 'api']);
+        Route::post('/', [Operator\CalendarController::class, 'store']);
+        Route::put('/', [Operator\CalendarController::class, 'update']);
+        Route::delete('{calendar}', [Operator\CalendarController::class, 'destroy']);
     });
 
     // Daftar
@@ -209,7 +251,7 @@ Route::middleware(['auth', 'role:operator'])->group(function () {
 });
 
 // === Admin ===
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'attendance', 'role:admin'])->group(function () {
 
     // Database
     Route::prefix('database')->group(function () {

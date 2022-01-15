@@ -13,7 +13,9 @@ class ScoreController extends Controller
         $data = [
             'subjects' => $scores->unique('subject_id')->load('subject'),
             'subGrades' => $scores->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id'])->load('subGrade'),
-            'competences' => $scores->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id'] . $v['competence_id'])->load('competence')
+            'competences' => $scores->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id'] . $v['competence_id'])
+                ->load('competence')
+                ->sortBy(fn ($q) => $q->competence->competence . $q->competence->type)
         ];
         return view('operator.scores.score', $data);
     }

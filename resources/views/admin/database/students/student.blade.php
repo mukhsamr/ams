@@ -11,7 +11,12 @@
     <div class="d-flex justify-content-between mb-2">
         <form action="/database/students" method="get" id="search">
             <div class="input-group w-auto">
-                <input type="text" name="keyword" class="form-control form-control-sm" placeholder="Cari nama..." value="{{ request('keyword') }}">
+                <select name="field" class="form-select form-select-sm" id="field">
+                    @foreach(array_slice($columns, 0,-1) as $column)
+                    <option value="{{ $column }}" {{ $column == $field ? 'selected' : '' }}>{{ Str::headline($column) }}</option>
+                    @endforeach
+                </select>
+                <input type="text" name="keyword" class="form-control form-control-sm" placeholder="..." value="{{ request('keyword') }}">
                 <button type="submit" class="btn btn-secondary btn-sm"><i data-feather="search"></i></button>
             </div>
         </form>
@@ -73,7 +78,6 @@
                         @foreach($students as $student)
                         <tr>
                             <td class="text-center"><a href="/database/students/edit/{{ $student->id }}"><i data-feather="edit"></i></a></td>
-
                             @foreach($columns as $key => $column)
                             @if($key < 1) <td>{!! $student[$column] !!}</td>
                                 @elseif($column == 'foto')
