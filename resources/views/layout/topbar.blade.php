@@ -1,6 +1,7 @@
 <nav class="navbar navbar-header navbar-expand navbar-light bg-white shadow-sm">
     <a class="sidebar-toggler" href="#"><span class="navbar-toggler-icon"></span></a>
-    <button class="btn navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="btn navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -12,14 +13,16 @@
         @if((session('isAbsen')))
         <span class="badge bg-success ms-3"><i data-feather="check"></i></span>
         @else
-        <button type="button" class="badge bg-warning border-0 ms-3" data-bs-toggle="modal" data-bs-target="#modalScan" {{ date('H:i:s') < session('setting')->start ? 'disabled' : '' }}>
+        <button type="button" class="badge bg-warning border-0 ms-3" data-bs-toggle="modal" data-bs-target="#modalScan"
+            {{ date('H:i:s') < session('setting')->start ? 'disabled' : '' }}>
             Anda belum absen
         </button>
         @endif
 
         @endif
 
-        <div class="modal fade" id="modalScan" tabindex="-1" aria-labelledby="modalScanLabel" aria-hidden="true">
+        <div class="modal fade" id="modalScan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="modalScanLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-body">
@@ -27,7 +30,10 @@
                         <strong id="message"></strong>
                         <div id="data"></div>
                     </div>
-                    <button class="btn btn-primary rounded-0" id="scan">Scan</button>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary me-auto" data-bs-dismiss="modal" id="stopQr">Tutup</button>
+                        <button class="btn btn-primary" id="scan">Scan</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -42,7 +48,8 @@
         <ul class="navbar-nav d-flex align-items-center navbar-light ms-auto">
 
             {{-- <li class="dropdown nav-icon">
-                <a href="#" data-bs-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user text-danger">
+                <a href="#" data-bs-toggle="dropdown"
+                    class="nav-link dropdown-toggle nav-link-lg nav-link-user text-danger">
                     <div class="d-lg-inline-block">
                         <i data-feather="bell"></i>
                     </div>
@@ -80,16 +87,14 @@
             </li> --}}
             <li class="dropdown">
                 <a href="#" data-bs-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
-                    <div class="d-none d-md-block d-lg-inline-block me-2">{!! auth()->user()->userable->nama !!}</div>
-                    <div class="avatar me-1">
-                        <img src="/storage/img/default.png" alt="">
-                    </div>
+                    <img src="{{ school()->logo }}" alt="logo">
                 </a>
                 <div class="dropdown-menu dropdown-menu-end">
-                    {{-- <a class="dropdown-item" href="/profil"><i data-feather="user"></i> Profil</a>
-                    <a class="dropdown-item" href="#"><i data-feather="mail"></i> Messages</a>
-                    <a class="dropdown-item" href="#"><i data-feather="settings"></i> Settings</a>
-                    <div class="dropdown-divider"></div> --}}
+                    <a class="dropdown-item" href="/profil"><i data-feather="user"></i> Profil</a>
+                    <a class="dropdown-item" href="/attendance"><i data-feather="airplay"></i> Daftar Hadir</a>
+                    {{-- <a class="dropdown-item" href="#"><i data-feather="mail"></i> Messages</a> --}}
+                    <a class="dropdown-item" href="/setting"><i data-feather="settings"></i> Setelan</a>
+                    <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{{ route('logout') }}"><i data-feather="log-out"></i> Logout</a>
                 </div>
             </li>

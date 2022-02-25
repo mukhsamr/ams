@@ -10,4 +10,14 @@ class AttendanceSetting extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    public static function student()
+    {
+        return self::firstWhere('type', 'student');
+    }
+
+    public static function teacher()
+    {
+        return self::firstWhere('type', 'teacher');
+    }
 }

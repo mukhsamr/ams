@@ -16,8 +16,7 @@ class TeacherController extends Controller
     {
         $teacher = new Teacher;
         $columns = $teacher::getColumns();
-        $where = in_array($request->field, ['tanggal_lahir', 'mulai_bekerja']) ? 'where' : 'whereDate';
-        $teachers = $request->keyword ? $teacher->$where($request->field, 'LIKE', "%$request->keyword%") : $teacher;
+        $teachers = $request->keyword ? $teacher->where($request->field, 'LIKE', "%$request->keyword%") : $teacher;
         $data = [
             'teachers' => $teachers->paginate(15)->withQueryString(),
             'fields' => array_map(fn ($v) => ucwords(str_replace('_', ' ', $v)), $columns),

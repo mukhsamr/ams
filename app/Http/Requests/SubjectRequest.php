@@ -34,4 +34,10 @@ class SubjectRequest extends FormRequest
             'subject.unique' => 'Nama mata pelajaran sudah ada'
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        $this->raport ?? $this->merge(['raport' => null]);
+        $this->local_content ?? $this->merge(['local_content' => null]);
+    }
 }

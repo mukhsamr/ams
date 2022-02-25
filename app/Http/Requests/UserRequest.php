@@ -26,6 +26,7 @@ class UserRequest extends FormRequest
         return [
             'username' => 'unique:users,username,' . $this->id . ',id',
             'password' => 'min:5',
+            'foto' => 'image|max:1024'
         ];
     }
 
@@ -34,11 +35,13 @@ class UserRequest extends FormRequest
         return [
             'username.unique' => 'Username sudah ada, coba yang lain',
             'password.min' => 'Password terlalu pendek',
+            'foto.image' => 'Ekstensi file tidak valid',
+            'foto.max' => 'Ukuran foto terlalu besar',
         ];
     }
 
     protected function prepareForValidation()
     {
-        if (!$this->change) $this->merge(['password' => 'Annahl123*']);
+        if (!$this->ignore && !$this->password) $this->merge(['password' => 'Annahl123*']);
     }
 }

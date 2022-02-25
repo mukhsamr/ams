@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('password')->default(bcrypt('Annahl123*'));
             $table->enum('level', [0, 1, 2, 3, 4, 5])->default('1');
             $table->string('status')->nullable();
+            $table->string('foto')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

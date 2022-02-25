@@ -1,20 +1,22 @@
 $(document).ready(function () {
 
     // Filter select score
+    function showCompetence() {
+        const subject = $('#subject-search').find(':selected').data('subject');
+        $(`#competence-search [subject = ${subject}]`).removeAttr('hidden');
+    }
 
-    $('select#subject').change(function () {
-        $('select#competence').val('')
-        $('select#competence *').removeAttr('selected').attr('hidden', true);
+    showCompetence();
 
-        const send = $(this).find(':selected').data('send');
-        $(`select#competence [data-subject = ${send}]`).removeAttr('hidden');
-        console.log(send);
+    $('#subject-search').change(function () {
+        $('#competence-search').val('')
+        $('#competence-search *').removeAttr('selected').attr('hidden', true);
+        showCompetence();
     });
 
-    $(`select#competence [data-subject = ${$('select#subject').find(':selected').data('send')}]`).removeAttr('hidden');
 
     // Submit score table
-    $('select#competence').change(function () {
+    $('#competence-search').change(function () {
         $('form#search-score').submit();
     });
 

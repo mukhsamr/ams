@@ -9,46 +9,78 @@ use App\Models\SubGrade;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    // Student
-    public function student()
+    // === Student
+    public function student(Request $request)
     {
-        $users = User::where('userable_type', Student::class)->orderBy(
-            Student::select('nama')
-                ->whereColumn('userable_id', 'students.id')
-                ->orderBy('nama')
-                ->limit(1)
-        )->paginate(15);
+        $keyword = $request->keyword;
         $data = [
-            'users' => $users,
-            'students' => Student::doesntHave('user')->get(),
-            'class' => Student::class,
+            'users' => User::select('users.id', 'nama', 'username')
+                ->withStudent()
+                ->where('nama', 'like', "%$keyword%")
+                ->orderBy('nama')
+                ->paginate(10)
+                ->withQueryString(),
+            'keyword' => $keyword,
         ];
 
-        return view('operator.user.students', $data);
+        return view('operator.users.students.student', $data);
     }
 
-    // Teacher
-    public function teacher()
+    public function studentCreate()
     {
-        $users = User::with(['userable', 'subGrade:id', 'subject:id'])->where('userable_type', Teacher::class)->orderBy(
-            Teacher::select('nama')
-                ->whereColumn('userable_id', 'teachers.id')
-                ->orderBy('nama')
-                ->limit(1)
-        )->paginate(15);
+        return view('operator.users.students.modal-create', [
+            'students' => Student::doesntHave('user')->get(['id', 'nama']),
+            'class' => Student::class,
+        ]);
+    }
 
-        $data = [
-            'users' => $users,
-            'teachers' => Teacher::doesntHave('user')->get(),
+    public function studentEdit($id)
+    {
+        return view('operator.users.students.modal-edit', [
+            'user' => User::select('users.id', 'username')->withStudent()->find($id),
             'class' => Teacher::class,
-            'subjects' => Subject::all(),
-            'subGrades' => SubGrade::all(),
+        ]);
+    }
+
+    // === Teacher
+    public function teacher(Request $request)
+    {
+        $keyword = $request->keyword;
+        $data = [
+            'users' => User::select('users.id', 'status', 'nama', 'username', 'level')
+                ->withTeacher()
+                ->where('nama', 'like', "%$keyword%")
+                ->orderBy('nama')
+                ->paginate(10)
+                ->withQueryString(),
+            'keyword' => $keyword,
         ];
 
-        return view('operator.user.teachers', $data);
+        return view('operator.users.teachers.teacher', $data);
+    }
+
+    public function teacherCreate()
+    {
+        return view('operator.users.teachers.modal-create', [
+            'teachers' => Teacher::doesntHave('user')->get(['id', 'nama']),
+            'subjects' => Subject::get(['id', 'subject']),
+            'subGrades' => SubGrade::get(),
+            'class' => Teacher::class,
+        ]);
+    }
+
+    public function teacherEdit($id)
+    {
+        return view('operator.users.teachers.modal-edit', [
+            'user' => User::select('users.id', 'status', 'nama', 'username', 'level')->withTeacher()->find($id),
+            'subjects' => Subject::select('id', 'subject')->withUser($id)->get(),
+            'subGrades' => SubGrade::withUser($id)->get(),
+            'class' => Teacher::class,
+        ]);
     }
 
     // ===
@@ -56,9 +88,13 @@ class UserController extends Controller
     public function store(UserRequest $request)
     {
         try {
-            $user = User::firstOrCreate($request->except(['_token', 'subGrade', 'subject']));
-            $user->subGrade()->attach($request->subGrade);
-            $user->subject()->attach($request->subject);
+            $user = User::create($request->except(['_token', 'subGrade', 'subject']));
+
+            // If is teacher
+            if ($request->userable_type == Teacher::class) {
+                $user->subGrades()->attach($request->subGrade);
+                $user->subjects()->attach($request->subject);
+            }
             $alert['type'] = 'success';
         } catch (\Throwable $e) {
             report($e);
@@ -74,8 +110,12 @@ class UserController extends Controller
         $user = User::find($request->id);
         try {
             $user->update($request->input());
-            $user->subGrade()->sync($request->subGrade);
-            $user->subject()->sync($request->subject);
+
+            // If is teacher
+            if ($request->userable_type == Teacher::class) {
+                $user->subGrades()->sync($request->subGrade);
+                $user->subjects()->sync($request->subject);
+            }
             $alert['type'] = 'success';
         } catch (\Throwable $e) {
             report($e);

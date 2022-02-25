@@ -6,24 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Models\Competence;
 use App\Models\Grade;
 use App\Models\Subject;
+use Illuminate\Http\Request;
 
 class CompetenceController extends Controller
 {
-    public function index($subject = null, $grade = null)
+    public function index(Request $request)
     {
         $subjects = Subject::all();
         $grades = Grade::all();
 
-        $subject ??= $subjects->first()->id;
-        $grade ??= $grades->first()->id;
+        $subject = $request->subject ?? ($subjects->first() ? $subjects->first()->id : null);
+        $grade = $request->grade ?? ($grades->first() ? $grades->first()->id : null);
+
+        $competence = Competence::withGrade()
+            ->where('subject_id', $subject)
+            ->where('grade_id', $grade)
+            ->withUsed()->paginate(10)->withQueryString();
 
         $data = [
             'subjects' => $subjects,
             'grades' => $grades,
-            'competences' => Competence::with('grade')->where([
-                'subject_id' => $subject,
-                'grade_id' => $grade
-            ])->get(),
+            'competences' => $competence,
             'selected' => [
                 'subject' => $subject,
                 'grade' => $grade,
@@ -31,5 +34,14 @@ class CompetenceController extends Controller
         ];
 
         return view('operator.competences.competence', $data);
+    }
+
+    public function edit($id)
+    {
+        return view('teacher.competences.modal-edit', [
+            'subjects' => Subject::all(),
+            'grades' => Grade::all(),
+            'competence' => Competence::withUsed()->find($id),
+        ]);
     }
 }

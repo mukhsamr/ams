@@ -3,22 +3,43 @@
 namespace App\Http\Controllers\Guardian;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\Note;
+use App\Models\Student;
 use App\Models\StudentVersion;
-use App\Models\SubGrade;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class NoteController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $subGrade = SubGrade::whereRelation('guardian', 'user_id', auth()->user()->id)->first(['id', 'sub_grade']);
+        $subGrade = auth()->user()->guardian->subGrade;
+        $notes = Note::withStudent()
+            ->whereRelation('studentVersion', 'sub_grade_id', $subGrade->id)
+            ->whereRelation('studentVersion.student', 'nama', 'like', "%$request->keyword%");
+
+        $attendances = Attendance::whereHas('user', function ($query) use ($subGrade) {
+            $query->whereHasMorph('userable', [Student::class], function ($query) use ($subGrade) {
+                $query->whereRelation('studentVersion', 'sub_grade_id', $subGrade->id);
+            });
+        })->get()->groupBy('user_id');
+
         $data = [
-            'notes' => Note::getNotes($subGrade),
             'subGrade' => $subGrade,
-            'check' => StudentVersion::where('sub_grade_id', $subGrade->id)->doesntHave('note')->pluck('id')->toArray()
+            'notes' => $notes->paginate(10)->withQueryString(),
+            'check' => StudentVersion::where('sub_grade_id', $subGrade->id)->doesntHave('note')->pluck('id')->toArray(),
+            'keyword' => $request->keyword,
+            'attendances' => $attendances->map(fn ($v) => $v->countBy('status'))
         ];
         return view('guardian.notes.note', $data);
+    }
+
+    public function edit($id)
+    {
+        return view('guardian.notes.modal-edit', [
+            'note' => Note::withStudent()->find($id)
+        ]);
     }
 
     public function update(Request $request)

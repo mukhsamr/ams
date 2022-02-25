@@ -12,25 +12,33 @@ class Calendar extends Model
 
     protected $guarded = ['id'];
     public $timestamps = false;
+    protected $cast = [
+        'is_holiday' => 'boolean'
+    ];
 
     protected static function booted()
     {
         static::addGlobalScope(fn ($q) => $q->orderBy('start'));
     }
+
     public function getFormatStartAttribute()
     {
         return Carbon::parse($this->start)->translatedFormat('l, d F Y');
     }
 
-    public static function isHoliday($date, $setting = null)
+    public function getFormatIsHolidayAttribute()
     {
-        $setting ??= AttendanceSetting::first();
+        return check_x($this->is_holiday);
+    }
+
+    public static function isHoliday($date, $setting)
+    {
         $weekend = [
             'sat' => $setting->sat,
             'sun' => $setting->sun,
         ];
 
-        $calendar = self::pluck('summary', 'start');
+        $calendar = self::where('is_holiday', true)->pluck('summary', 'start');
         if ($weekend[strtolower(date('D', strtotime($date)))] ?? false) {
             return [
                 'holiday' => true,

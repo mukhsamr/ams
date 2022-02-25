@@ -17,6 +17,7 @@ class CreateCalendarsTable extends Migration
             $table->id();
             $table->string('summary')->unique();
             $table->date('start');
+            $table->boolean('is_holiday')->nullable();
         });
     }
 

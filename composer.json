@@ -13,6 +13,7 @@
         "laravel/socialite": "^5.2",
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
+        "mpdf/mpdf": "^8.0",
         "simplesoftwareio/simple-qrcode": "^4.2"
     },
     "require-dev": {
@@ -31,7 +32,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helper/helper.php"
+            "app/Helpers/helper.php",
+            "app/Helpers/PaginationHelper.php"
         ]
     },
     "autoload-dev": {

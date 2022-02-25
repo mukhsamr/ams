@@ -8,43 +8,80 @@ use App\Models\Competence;
 use App\Models\Journal;
 use App\Models\SubGrade;
 use App\Models\Subject;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class JournalController extends Controller
 {
-    public function index($subject = null, $subGrade = null)
+    public function index(Request $request)
     {
-        $subjects = Subject::all();
-        $journals = Journal::with('subject', 'competence', 'subGrade');
-        $competences = Competence::with('grade');
-        $subGrades = SubGrade::with('grade')->get();
+        $subjects = Subject::all(['id', 'subject']);
+        $subGrades = SubGrade::all();
 
-        if ($subject) {
-            $journals->where('subject_id', $subject);
-            $competences->where('subject_id', $subject);
-        };
-        if ($subGrade) {
-            $journals->where('sub_grade_id', $subGrade);
-            $competences->where('grade_id', $subGrades->find($subGrade)->grade_id);
-        };
+        $date = date('Y-m-d');
+
+        $start = $request->start ?? $date;
+        $end = $request->end ?? $date;
+
+        $subject = $request->subject;
+        $subGrade = $request->subGrade;
+
+        $journals = Journal::joinFilter($start, $end);
+
+        if ($subject) $journals->where('journals.subject_id', $subject);
+        if ($subGrade) $journals->where('sub_grade_id', $subGrade);
 
         $data = [
             'subGrades' => $subGrades,
-            'journals'  => $journals->paginate(10),
+            'journals'  => $journals->paginate(10)->withQueryString(),
             'subjects'  => $subjects,
-            'competences' => $competences->get(),
             'selected'  => [
+                'start' => $start,
+                'end'   => $end,
                 'subject'   => $subject,
-                'subGrade'  => $subGrade
+                'subGrade'  => $subGrade,
             ]
         ];
         return view('operator.journals.journal', $data);
     }
 
-    public function export($subject, $subGrade)
+    public function edit($id)
     {
-        $name = ($subject ? ' ' . Subject::find($subject)->subject : null) . ($subGrade ? ' ' . SubGrade::find($subGrade)->sub_grade : null);
+        $journal = Journal::addSelect([
+            'summary' => Competence::select('summary')
+                ->whereColumn('id', 'journals.competence_id')
+                ->limit(1),
+            'grade_id' => SubGrade::select('grade_id')
+                ->whereColumn('id', 'journals.sub_grade_id')
+                ->limit(1)
+        ])->find($id);
 
-        return Excel::download(new JournalExport('operator', ['subject_id' => $subject], ['sub_grade_id' => $subGrade]), "Jurnal$name.xlsx");
+        return view('teacher.journals.modal-edit', [
+            'journal' => $journal,
+            'subjects' => Subject::get(['id', 'subject']),
+            'subGrades' => SubGrade::all(),
+            'competences' => Competence::all(),
+        ]);
+    }
+
+    public function export(Request $request)
+    {
+        $journals = (new Journal)->joinFilter($request->start, $request->end);
+        $subject = $request->subject ?? null;
+        $subGrade = $request->sub_grade ?? null;
+
+        $name = 'Jurnal';
+        if ($subject) {
+            $journals->where('journals.subject_id', $subject);
+            $name .= ' ' . Subject::find($subject)->subject;
+        }
+        if ($subGrade) {
+            $journals->where('journals.sub_grade_id', $subGrade);
+            $name .= ' ' . SubGrade::find($subGrade)->sub_grade;
+        }
+
+        $name .= ' -- ' . formatDate($request->start) . ' - ' . formatDate($request->end) . '.xlsx';
+
+        return Excel::download(new JournalExport($journals, 'operators/journal'), $name);
     }
 }

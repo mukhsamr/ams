@@ -18,12 +18,12 @@ class CreateAttendancesTable extends Migration
             $table->date('date');
             $table->time('hours')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('restrict')->onUpdate('cascade');
-            $table->string('status');
-            $table->string('etc');
+            $table->string('status')->nullable();
+            $table->string('etc')->nullable();
             $table->unsignedInteger('version_id');
             $table->timestamps();
 
-            $table->unique(['date', 'user_id']);
+            $table->unique(['date', 'user_id', 'version_id']);
             $table->foreign('version_id')->references('id')->on('versions')->onDelete('restrict')->onUpdate('cascade');
         });
     }

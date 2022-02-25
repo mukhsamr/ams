@@ -11,12 +11,12 @@
     <form action="/teacher/home" method="get" class="d-flex mb-2" id="search-home">
         <select name="subject" id="subject" class="form-select form-select-sm w-auto">
             @foreach($subjects as $subject)
-            <option value="{{ $subject->id }}" {{ $selected['subject'] == $subject->id ? 'selected' : '' }}>{{ $subject->subject }}</option>
+            <option value="{{ $subject->id }}" {{ selected($selected['subject'] == $subject->id) }}>{{ $subject->subject }}</option>
             @endforeach
         </select>
         <select name="subGrade" id="subGrade" class="form-select form-select-sm w-auto ms-2" onchange="this.form.submit()">
             @foreach($subGrades as $subGrade)
-            <option value="{{ $subGrade->id }}" {{ $selected['subGrade'] == $subGrade->id ? 'selected' : '' }}>{{ $subGrade->sub_grade }}</option>
+            <option value="{{ $subGrade->id }}" {{ selected($selected['subGrade'] == $subGrade->id) }}>{{ $subGrade->sub_grade }}</option>
             @endforeach
         </select>
     </form>

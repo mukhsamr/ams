@@ -7,27 +7,28 @@ use App\Http\Requests\StudentVersionRequest;
 use App\Models\Student;
 use App\Models\StudentVersion;
 use App\Models\SubGrade;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class StudentVersionController extends Controller
 {
-    public function index($subGrade = null)
+    public function index(Request $request)
     {
         $subGrades = SubGrade::all();
-        $subGrade ??= $subGrades->first()->id;
+        $subGrade = $request->subGrade ?? ($subGrades->first() ? $subGrades->first()->id : null);
+
         $data = [
-            'students' => StudentVersion::with(['student', 'subGrade'])->where('sub_grade_id', $subGrade)->get()->sortBy(fn ($q) => $q->student->nama),
+            'students' => StudentVersion::withStudent()->where('sub_grade_id', $subGrade)->get(),
             'subGrades' => $subGrades,
             'selected' => $subGrade,
         ];
         return view('operator.students.student', $data);
     }
 
-    public function create($subGrade)
+    public function create($id)
     {
         $data = [
-            'subGrade' => SubGrade::find($subGrade) ?: SubGrade::first(),
-            'students' => Student::whereDoesntHave('studentVersion', fn (Builder $query) => $query->where('version_id', session('version')->id))->get(),
+            'subGrade' => SubGrade::find($id) ?: SubGrade::first(),
+            'students' => Student::whereDoesntHave('studentVersion', fn ($query) => $query->where('version_id', session('version')->id))->get(),
         ];
         return view('operator.students.create', $data);
     }

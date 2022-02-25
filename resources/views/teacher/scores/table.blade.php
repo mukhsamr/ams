@@ -31,9 +31,9 @@
                     <div class="modal-footer d-flex justify-content-between">
                         <form action="/teacher/scores/drop/{{ $name }}" method="post">
                             @csrf @method('delete')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hapus nilai ini?')"><i data-feather="x-circle" class="me-1"></i> Hapus Nilai</button>
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Hapus nilai ini?')"><i data-feather="x-circle" class="me-1"></i> Hapus Nilai</button>
                         </form>
-                        <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>
                 </div>
             </div>
@@ -127,9 +127,9 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($lists as $list)
+            @foreach($students as $list)
             <tr class="text-center">
-                <td class="text-start">{!! $list->studentVersion->student->nama !!}</td>
+                <td class="text-start">{!! $list->nama !!}</td>
                 @foreach($fields as $field)
                 @if($field == 'keterangan')
                 <td>{!! $list->status !!}</td>

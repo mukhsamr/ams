@@ -1,7 +1,6 @@
 $(document).ready(function () {
-    $('select#subGrade').change(function () {
-        const url = $('form#search-student').attr('action');
-        location.href = [url, $(this).val()].join('/');
+    $('#subGrade-search').change(function () {
+        this.form.submit();
     });
 
     // Search

@@ -21,7 +21,7 @@ class CreateScoresTable extends Migration
             $table->foreignId('competence_id')->constrained()->onDelete('restrict')->onUpdate('cascade');
             $table->unsignedInteger('version_id');
 
-            $table->unique(['name', 'version_id']);
+            $table->unique(['subject_id', 'sub_grade_id', 'competence_id', 'version_id'], 'score_unique');
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('sub_grade_id')->references('id')->on('sub_grades')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('version_id')->references('id')->on('versions')->onDelete('restrict')->onUpdate('cascade');

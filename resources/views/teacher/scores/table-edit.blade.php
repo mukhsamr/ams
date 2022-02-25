@@ -11,9 +11,9 @@
     <tbody>
         @foreach($scores as $score)
         <tr>
-            <td>{!! $score->studentVersion->student->nama !!}</td>
+            <td>{!! $score->nama !!}</td>
             <td class="text-center w-25">
-                <input type="number" name="{{ $field }}[{{ $score->studentVersion->id }}]" step="0.1" min="0" max="100" class="form-control" value="{{ $score->$field }}">
+                <input type="number" name="{{ $field }}[{{ $score->student_version_id }}]" step="0.1" min="0" max="100" class="form-control" value="{{ $score->$field }}">
             </td>
         </tr>
         @endforeach

@@ -32,6 +32,7 @@ class CalendarController extends Controller
         foreach ($api as $key => $event) {
             $rules[$key . '.summary'] = 'string';
             $rules[$key . '.start'] = 'unique:calendars,start';
+            $rules[$key . '.is_holiday'] = 'boolean';
 
             $messages[$key . '.start.unique'] = $event['start'] . ' sudah ada';
         }
@@ -64,6 +65,7 @@ class CalendarController extends Controller
             $data[] = [
                 'summary' => $item->summary,
                 'start' => $item->start->date,
+                'is_holiday' => 1
             ];
         }
 
@@ -86,6 +88,8 @@ class CalendarController extends Controller
 
     public function update(CalendarRequest $calendar)
     {
+        if (!$calendar->is_holiday) $calendar->merge(['is_holiday' => null]);
+
         try {
             Calendar::find($calendar->id)->update($calendar->input());
             $alert['type'] = 'success';

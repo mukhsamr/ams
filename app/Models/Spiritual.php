@@ -11,4 +11,9 @@ class Spiritual extends Model
 
     protected $guarded = ['id'];
     public $timestamps = false;
+
+    public function studentVersions()
+    {
+        return $this->belongsToMany(StudentVersion::class, 'student_version_spirituals');
+    }
 }

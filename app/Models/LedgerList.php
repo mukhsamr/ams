@@ -26,10 +26,32 @@ class LedgerList extends Model
         return $this->belongsTo(StudentVersion::class, 'student_version_id', 'id');
     }
 
-    public function getPREAttribute($value)
+    // ===
+
+    public function scopeWithStudents($query)
     {
-        $color = $value == 'A' ? 'primary' : ($value == 'B' ? 'success' : ($value == 'C' ? 'warning' : 'danger'));
-        return '<strong class="text-' . $color . '">' . $value . '</strong>';
+        return $query->addSelect([
+            'nama' => Student::select('nama')
+                ->whereHas('studentVersion', function ($query) {
+                    $query->whereColumn('id', $this->table . '.student_version_id');
+                })
+                ->limit(1),
+        ]);
+    }
+
+    public function scopeWithCalled($query)
+    {
+        $query->addSelect([
+            'called' => Note::select('called')->limit(1),
+        ]);
+    }
+
+    //  ===
+
+    public function getFormatPreAttribute()
+    {
+        $color = $this->pre == 'A' ? 'primary' : ($this->pre == 'B' ? 'success' : ($this->pre == 'C' ? 'warning' : 'danger'));
+        return '<strong class="text-' . $color . '">' . $this->pre . '</strong>';
     }
 
     public function getFieldsLedger($type)
@@ -89,7 +111,7 @@ class LedgerList extends Model
     public function getDeskripsi($scores, $competences, $kkm)
     {
         if ($scores) {
-            $array = $scores->toArray();
+            $array = $scores->getAttributes();
 
             $max = max($array);
             $min = min($array);
@@ -112,7 +134,8 @@ class LedgerList extends Model
         $kkm = $competences->avg('kkm');
         $fields = $this->getFieldsLedger($type);
 
-        if ($deleted = array_diff($fields->toArray(), array_keys($insert))) {
+        $fieldsArray = $fields->toArray();
+        if ($deleted = array_diff($fieldsArray, array_keys($insert))) {
             Schema::table($this->table, fn (Blueprint $table) => $table->dropColumn(str_replace('.', '_', $deleted)));
         }
         foreach ($insert as $column => $values) {
@@ -124,9 +147,9 @@ class LedgerList extends Model
                     $this->where('student_version_id', $id)->update([$column => $value]);
 
                     $row = $this->where('student_version_id', $id);
-                    $scores = $row->first($fields->toArray());
+                    $scores = $row->first($fieldsArray);
+                    $rph = $this->getRPH($scores->getAttributes());
 
-                    $rph = $this->getRPH($scores);
                     if ($type == '1') {
                         $hpa = $this->getHPA($rph, $row->value('pas'));
                         $pre = $this->getPRE($hpa, $kkm);

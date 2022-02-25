@@ -11,7 +11,7 @@
 
     <div class="d-flex justify-content-between mb-2">
         <input type="text" id="search" class="form-control form-control-sm w-auto" placeholder="Cari...">
-        <a href="/daftar/students/{{ $subGrade->id }}" class="btn btn-dark btn-sm"><i data-feather="arrow-left"></i></a>
+        <a href="/daftar/students?subGrade={{ $subGrade->id }}" class="btn btn-dark btn-sm"><i data-feather="arrow-left"></i></a>
     </div>
 
     @if($alert = session('alert'))

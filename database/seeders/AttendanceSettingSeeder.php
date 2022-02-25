@@ -15,11 +15,21 @@ class AttendanceSettingSeeder extends Seeder
     public function run()
     {
         AttendanceSetting::insert([
-            'start' => '07:00:00',
-            'end' => '08:00:00',
-            'sat' => null,
-            'sun' => 1,
-            'qrcode' => bcrypt('nqm' . time() . 'education')
+            [
+                'type' => 'student',
+                'start' => '07:00:00',
+                'end' => '08:00:00',
+                'sat' => null,
+                'sun' => 1,
+                'qrcode' => bcrypt('student.nqm' . time() . 'education')
+            ], [
+                'type' => 'teacher',
+                'start' => '07:00:00',
+                'end' => '08:00:00',
+                'sat' => null,
+                'sun' => 1,
+                'qrcode' => bcrypt('teacher.nqm' . time() . 'education')
+            ]
         ]);
     }
 }

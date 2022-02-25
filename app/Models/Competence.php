@@ -24,7 +24,7 @@ class Competence extends Model
         return $this->type == 1 ? "3.{$this->competence}" : "4.{$this->competence}";
     }
 
-    public function score()
+    public function scores()
     {
         return $this->hasMany(Score::class);
     }
@@ -37,5 +37,30 @@ class Competence extends Model
     public function subject()
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function journals()
+    {
+        return $this->hasMany(Journal::class);
+    }
+
+    // ===
+
+    public function scopeWithUsed($query)
+    {
+        return $query->addSelect([
+            'used' => Score::select('competence_id')
+                ->whereColumn('competence_id', 'competences.id')
+                ->limit(1)
+        ]);
+    }
+
+    public function scopeWithGrade($query)
+    {
+        return $query->addSelect([
+            'grade' => Grade::select('grade')
+                ->whereColumn('id', 'competences.grade_id')
+                ->limit(1)
+        ]);
     }
 }

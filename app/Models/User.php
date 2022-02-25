@@ -38,32 +38,32 @@ class User extends Authenticatable
         return $role[$this->level];
     }
 
-    public function subject()
+    public function getFotoAttribute($value)
+    {
+        return $value ? 'users/' . $value : $value;
+    }
+
+    public function subjects()
     {
         return $this->belongsToMany(Subject::class);
     }
 
-    public function subjectUser()
+    public function subjectUsers()
     {
         return $this->hasMany(SubjectUser::class);
     }
 
-    public function subGrade()
+    public function subGrades()
     {
         return $this->belongsToMany(SubGrade::class);
     }
 
-    public function competence()
+    public function competences()
     {
         return $this->hasManyThrough(Competence::class, SubjectUser::class, 'user_id', 'subject_id', 'id', 'subject_id');
     }
 
-    public function score()
-    {
-        return $this->hasManyThrough(Score::class, SubjectUser::class, 'user_id', 'subject_id', 'id', 'subject_id');
-    }
-
-    public function journal()
+    public function journals()
     {
         return $this->hasMany(Journal::class);
     }
@@ -78,46 +78,57 @@ class User extends Authenticatable
         return $this->morphTo();
     }
 
-    public function attendance()
+    public function attendances()
     {
         return $this->hasMany(Attendance::class);
     }
 
-    public function getSubject()
+    // === 
+
+    public function scores()
     {
-        return $this->subject->pluck('id')->toArray();
+        return Score::query()
+            ->select('scores.*', 'competences.competence', 'competences.type')
+            ->join('subject_user', 'subject_user.subject_id', '=', 'scores.subject_id')
+            ->join('sub_grade_user', 'sub_grade_user.sub_grade_id', '=', 'scores.sub_grade_id')
+            ->join('competences', 'competences.id', '=', 'scores.competence_id')
+            ->addSelect([
+                'subject' => Subject::select('subject')
+                    ->whereColumn('id', 'scores.subject_id')
+                    ->limit(1),
+                'subGrade' => SubGrade::select('sub_grade')
+                    ->whereColumn('id', 'scores.sub_grade_id')
+                    ->limit(1),
+            ])
+            ->where('subject_user.user_id', $this->id)
+            ->where('sub_grade_user.user_id', $this->id)
+            ->get();
     }
 
-    public function getSubGrade()
+    public function grades()
     {
-        return $this->subGrade->pluck('id')->toArray();
+        return Grade::query()
+            ->select('grades.*')
+            ->join('sub_grades', 'sub_grades.grade_id', '=', 'grades.id')
+            ->join('sub_grade_user', 'sub_grade_user.sub_grade_id', '=', 'sub_grades.id')
+            ->where('sub_grade_user.user_id', $this->id)
+            ->distinct()
+            ->get();
     }
 
-    public function getGrade()
+    // ===
+
+    public function scopeWithTeacher($query)
     {
-        return $this->subGrade->unique('grade_id')->pluck('grade_id')->toArray();
+        return $query
+            ->join('teachers', 'teachers.id', '=', 'users.userable_id')
+            ->where('userable_type', Teacher::class);
     }
 
-    // 
-    public function getCompetence($subject = null, $grade = null)
+    public function scopeWithStudent($query)
     {
-        $subject = $subject ?: $this->getSubject();
-        $grade = $grade ?: $this->getGrade();
-
-        return $this->competence()
-            ->with('grade')
-            ->whereIn('competences.subject_id', is_array($subject) ? $subject : [$subject])
-            ->whereIn('grade_id', is_array($grade) ? $grade : [$grade]);
-    }
-
-    public function getJournal($subject = null, $subGrade = null)
-    {
-        $subject = $subject ?: $this->getSubject();
-        $subGrade = $subGrade ?: $this->getSubGrade();
-
-        return $this->journal()
-            ->with(['competence.grade', 'subGrade', 'subject'])
-            ->whereIn('subject_id', is_array($subject) ? $subject : [$subject])
-            ->whereIn('sub_grade_id', is_array($subGrade) ? $subGrade : [$subGrade]);
+        return $query
+            ->join('students', 'students.id', '=', 'users.userable_id')
+            ->where('userable_type', Student::class);
     }
 }

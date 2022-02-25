@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Exports\JournalExport;
 use App\Imports\JournalImport;
+use App\Models\Competence;
 use App\Models\Journal;
 use App\Models\SubGrade;
 use App\Models\Subject;
@@ -14,23 +15,44 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class JournalController extends Controller
 {
-    public function index($subject = null, $subGrade = null)
+    public function index(Request $request)
     {
         $user = auth()->user();
 
-        $grade = $subGrade ? SubGrade::find($subGrade)->id : null;
+        $subjects = $user->subjects;
+        $subGrades = $user->subGrades;
+        $subject = $subjects->find($request->subject) ?? $subjects->first();
+        $subGrade = $subGrades->find($request->subGrade) ?? $subGrades->first();
+
+        $subject_id = $subject ? $subject->id : null;
+        $subGrade_id = $subGrade ? $subGrade->id : null;
+
+        $journals = $user->journals()->joinFilter()
+            ->where('journals.subject_id', $subject_id)
+            ->where('journals.sub_grade_id', $subGrade_id)
+            ->paginate(10)->withQueryString();
+
         $data = [
-            'subGrades' => $user->subGrade->load('grade'),
-            'journals'  => $user->getJournal($subject, $subGrade)->paginate(15),
-            'subjects'  => $user->subject,
-            'competences' => $user->getCompetence($subject, $grade)->get(),
+            'subjects'  => $subjects,
+            'subGrades' => $subGrades,
+            'journals'  => $journals,
             'selected'  => [
-                'subject'   => $subject,
-                'subGrade'  => $subGrade,
+                'subject'   => $subject_id,
+                'subGrade'  => $subGrade_id,
             ]
         ];
 
         return view('teacher.journals.journal', $data);
+    }
+
+    public function create()
+    {
+        $user = auth()->user();
+        return view('teacher.journals.modal-create', [
+            'subjects'  => $user->subjects,
+            'subGrades' => $user->subGrades,
+            'competences' => $user->competences,
+        ]);
     }
 
     public function store(Request $request)
@@ -51,8 +73,30 @@ class JournalController extends Controller
         return back()->with('alert', $alert);
     }
 
+    public function edit($id)
+    {
+        $user = auth()->user();
+
+        $journal = Journal::addSelect([
+            'summary' => Competence::select('summary')
+                ->whereColumn('id', 'journals.competence_id')
+                ->limit(1),
+            'grade_id' => SubGrade::select('grade_id')
+                ->whereColumn('id', 'journals.sub_grade_id')
+                ->limit(1)
+        ])->find($id);
+
+        return view('teacher.journals.modal-edit', [
+            'journal' => $journal,
+            'subjects' => $user->subjects,
+            'subGrades' => $user->subGrades,
+            'competences' => $user->competences,
+        ]);
+    }
+
     public function update(Request $request)
     {
+        if (!$request->is_swapped) $request->merge(['is_swapped' => null]);
         try {
             Journal::find($request->id)->update($request->input());
             $alert['type'] = 'success';
@@ -95,11 +139,23 @@ class JournalController extends Controller
     public function export(Request $request)
     {
         $user = auth()->user();
-        $subject = $request->subject ? Subject::find($request->subject)->subject : null;
-        $subGrade = $request->subGrade ? SubGrade::find($request->subGrade)->sub_grade : null;
-        $name = str_replace('&nbsp;', ' ', $user->userable->nama);
-        $file = 'Jurnal ' . implode('', [$name, " $subject", " $subGrade"]) . '.xlsx';
 
-        return Excel::download(new JournalExport('teacher', ['user_id' => $user->id], ['subject_id' => $request->subject], ['sub_grade_id' => $request->subGrade]), $file);
+        $journals = $user->journals()->joinFilter($request->start, $request->end);
+        $subject = $request->subject ?? null;
+        $subGrade = $request->sub_grade ?? null;
+
+        $name = 'Jurnal';
+        if ($subject) {
+            $journals->where('journals.subject_id', $subject);
+            $name .= ' ' . Subject::find($subject)->subject;
+        }
+        if ($subGrade) {
+            $journals->where('journals.sub_grade_id', $subGrade);
+            $name .= ' ' . SubGrade::find($subGrade)->sub_grade;
+        }
+
+        $name .= ' -- ' . formatDate($request->start) . ' - ' . formatDate($request->end) . '.xlsx';
+
+        return Excel::download(new JournalExport($journals, 'teachers/journal'), $name);
     }
 }

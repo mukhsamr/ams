@@ -17,9 +17,11 @@ class Identity
      */
     public function handle(Request $request, Closure $next)
     {
-        session([
-            'version' => Version::firstWhere('is_used', 1)
-        ]);
+        if (!session('version')) {
+            session([
+                'version' => Version::firstWhere('is_used', 1)
+            ]);
+        }
 
         return $next($request);
     }

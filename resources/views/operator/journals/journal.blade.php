@@ -10,29 +10,83 @@
 <hr>
 <section class="section">
     <div class="row g-1 mb-2">
-        <div class="col-12 col-md-6 order-2 order-md-0">
-            <form action="/operator/journals" id="search-journals" class="d-flex">
-                <select name="subject" class="form-select form-select-sm w-auto">
-                    <option value="0" {{ $selected['subject'] == '0' ? 'selected' : '' }}>Semua</option>
-                    @foreach($subjects as $subject)
-                    <option value="{{ $subject->id }}" {{ $subject->id == $selected['subject'] ? 'selected' : '' }}>{{ $subject->subject }}</option>
-                    @endforeach
-                </select>
-                <select name="sub_grade" class="form-select form-select-sm w-auto ms-2">
-                    <option value="0" {{ $selected['subGrade'] == '0' ? 'selected' : '' }}>Semua</option>
-                    @foreach($subGrades as $subGrade)
-                    <option value="{{ $subGrade->id }}" {{ $subGrade->id == $selected['subGrade'] ? 'selected' : '' }}>{{ $subGrade->sub_grade }}</option>
-                    @endforeach
-                </select>
+        <div class="col-12 col-md-7 order-2 order-md-0">
+            <form action="/operator/journals" class="row g-1">
+                <div class="col-6 col-md-3">
+                    <input type="date" name="start" class="form-control form-control-sm" value="{{ $selected['start'] }}" max="{{ date('Y-m-d') }}">
+                </div>
+                <div class="col-6 col-md-3">
+                    <input type="date" name="end" class="form-control form-control-sm" value="{{ $selected['end'] }}" max="{{ date('Y-m-d') }}">
+                </div>
+                <div class="col-8 col-md-4">
+                    <select name="subject" class="form-select form-select-sm" id="subject-search">
+                        <option value="0" {{ selected($selected['subject']) }}>Semua</option>
+                        @foreach($subjects as $subject)
+                        <option value="{{ $subject->id }}" {{ selected($subject->id == $selected['subject']) }}>{{ $subject->subject }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-4 col-md-2">
+                    <select name="subGrade" class="form-select form-select-sm" id="subGrade-search">
+                        <option value="0" {{ selected($selected['subGrade']) }}>Semua</option>
+                        @foreach($subGrades as $subGrade)
+                        <option value="{{ $subGrade->id }}" {{ selected($subGrade->id == $selected['subGrade']) }}>{{ $subGrade->sub_grade }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </form>
         </div>
-        <div class="col-6 col-md-1 order-12 order-md-0 text-md-end">
-            <form action="/operator/journals/export/{{ $selected['subject'] ?? 0 }}/{{ $selected['subGrade'] ?? 0 }}" method="post">
-                @csrf
-                <button type="submit" class="btn btn-dark btn-sm" onclick="return confirm('Download jurnal?')">
-                    <i data-feather="download"></i>
-                </button>
-            </form>
+        <div class="col-12 col-md-5 order-1 order-md-0 text-md-end">
+            <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#export">
+                <i data-feather="download"></i>
+            </button>
+        </div>
+        <div class="modal fade" id="export" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exportLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/operator/journals/export" method="post">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exportLabel">Export Jurnal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-2">
+                                <div class="col-12 col-md-6">
+                                    <label for="start">Dari</label>
+                                    <input type="date" name="start" class="form-control form-control-sm" required max="{{ date('Y-m-d') }}">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="end">Sampai</label>
+                                    <input type="date" name="end" class="form-control form-control-sm" required max="{{ date('Y-m-d') }}">
+                                </div>
+                                <div class="col-12">
+                                    <label for="subject">Pelajaran</label>
+                                    <select name="subject" class="form-select form-select-sm" required>
+                                        @foreach($subjects as $subject)
+                                        <option value="{{ $subject->id }}">{{ $subject->subject }}</option>
+                                        @endforeach
+                                        <option value="0">Semua</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="sub_grade">Kelas</label>
+                                    <select name="sub_grade" class="form-select form-select-sm" required>
+                                        @foreach($subGrades as $subGrade)
+                                        <option value="{{ $subGrade->id }}">{{ $subGrade->sub_grade }}</option>
+                                        @endforeach
+                                        <option value="0">Semua</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary me-auto" data-bs-dismiss="modal">Tutup</button>
+                            <button type="submit" class="btn btn-dark">Download</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -50,12 +104,14 @@
                 <thead class="text-center">
                     <tr>
                         <th>Tanggal</th>
+                        <th>Jam&nbsp;ke</th>
                         <th>Kelas</th>
                         <th>Pelajaran</th>
                         <th>TM</th>
-                        <th>Jam&nbsp;ke</th>
                         <th>Kompetensi</th>
                         <th>Materi</th>
+                        <th>Nama</th>
+                        <th>Pengganti</th>
                         <th>Edit</th>
                         <th>Hapus</th>
                     </tr>
@@ -64,101 +120,17 @@
                     @foreach ($journals as $journal)
                     <tr>
                         <td>{{ $journal->format_date }}</td>
-                        <td class="text-center">{{ $journal->subGrade->sub_grade }}</td>
-                        <td class="text-center">{{ $journal->subject->subject }}</td>
-                        <td class="text-center">{{ $journal->tm }}</td>
                         <td class="text-center">{{ $journal->jam_ke }}</td>
-                        <td class="text-center">{{ $journal->competence->format_competence }}</td>
-                        <td>{{ $journal->matter }}</td>
+                        <td class="text-center">{{ $journal->sub_grade }}</td>
+                        <td>{{ $journal->subject }}</td>
+                        <td class="text-center">{{ $journal->tm }}</td>
+                        <td class="text-center">{{ competence($journal) }}</td>
+                        <td><span class="short">{{ $journal->matter }}</span></td>
+                        <td>{{ $journal->nama }}</td>
+                        <td class="text-center">{!! check_x($journal->is_swapped) !!}</td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-info btn-sm me-1" data-bs-toggle="modal" data-bs-target="#update-journal-{{ $journal->id }}">
-                                <i data-feather="edit"></i>
-                            </button>
+                            <a href="/operator/journals/edit/{{ $journal->id }}" class="btn btn-sm btn-info load-modal-journal" data-target="#edit"><i data-feather="edit"></i></a>
                         </td>
-                        <div class="modal fade" id="update-journal-{{ $journal->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="update-journalLabel-{{ $journal->id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form action="/teacher/journals" method="post">
-                                        @csrf @method('put')
-                                        <div class="modal-header bg-info">
-                                            <h5 class="modal-title text-white" id="update-journalLabel-{{ $journal->id }}">Edit Jurnal</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="row g-2">
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-group">
-                                                        <label for="date">Tanggal</label>
-                                                        <input type="date" id="date" class="form-control form-control-sm" name="date" max="{{ date('Y-m-d') }}" value="{{ $journal->date }}" required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-group">
-                                                        <label for="subject">Pelajaran</label>
-                                                        <select name="subject_id" id="subject-{{ $journal->id }}" data-id="{{ $journal->id }}" class="form-select form-select-sm" required>
-                                                            <option hidden></option>
-                                                            @foreach($subjects as $subject)
-                                                            <option value="{{ $subject->id }}" {{ $journal->subject->id == $subject->id ? 'selected' : '' }}>{{ $subject->subject }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="form-group">
-                                                        <label for="tm">TM</label>
-                                                        <input type="number" name="tm" class="form-control form-control-sm" id="tm" value="{{ $journal->tm }}" required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="form-group">
-                                                        <label for="jam_ke">Jam ke</label>
-                                                        <select name="jam_ke" id="jam_ke" class="form-select form-control-sm" required>
-                                                            <option hidden></option>
-                                                            @for($i = 1; $i < 5; $i++) <option value="{{ $i }}" {{ $journal->jam_ke == $i ? 'selected' : '' }}>{{ $i }}</option> @endfor
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="form-group">
-                                                        <label for="sub_grade">Kelas</label>
-                                                        <select name="sub_grade_id" id="sub_grade-{{ $journal->id }}" data-id="{{ $journal->id }}" class="form-select form-select-sm" required>
-                                                            <option hidden></option>
-                                                            @foreach($subGrades as $subGrade)
-                                                            <option value="{{ $subGrade->id }}" data-grade="{{ $subGrade->grade }}" {{ $journal->subGrade->id == $subGrade->id ? 'selected' : '' }}>{{ $subGrade->sub_grade }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-12">
-                                                    <div class="form-group">
-                                                        <label for="competence">Kompetensi</label>
-                                                        <select name="competence_id" id="competence-{{ $journal->id }}" data-id="{{ $journal->id }}" class="form-select form-select-sm" required>
-                                                            <option hidden></option>
-                                                            @foreach($competences as $competence)
-                                                            <option hidden value="{{ $competence->id }}" subject="{{ $competence->subject_id }}" grade="{{ $competence->grade }}" data-summary="{{ $competence->summary }}" {{ $journal->competence->id == $competence->id ? 'selected' : '' }}>
-                                                                {{ $competence->format_competence }}
-                                                            </option>
-                                                            @endforeach
-                                                        </select>
-                                                        <textarea class="form-control form-control-sm mt-2" id="summary-{{ $journal->id }}" disabled>{{ $journal->competence->summary }}</textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="col-12">
-                                                    <div class="form-group">
-                                                        <label for="matter">Materi / Metode</label>
-                                                        <textarea name="matter" id="matter" class="form-control form-control-sm" required>{{ $journal->matter }}</textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary me-auto" data-bs-dismiss="modal">Tutup</button>
-                                            <button type="submit" class="btn btn-info">Simpan</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                         <td class="text-center">
                             <form action="/teacher/journals/{{ $journal->id }}" method="post">
                                 @csrf @method('delete')
@@ -175,6 +147,7 @@
     </div>
 
     {{ $journals->links() }}
+    <div id="modal"></div>
 </section>
 
 @endsection

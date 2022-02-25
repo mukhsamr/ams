@@ -166,6 +166,7 @@ return [
          * Package Service Providers...
          */
         SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -175,7 +176,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class,
+        App\Providers\BladeServiceProvider::class,
 
     ],
 

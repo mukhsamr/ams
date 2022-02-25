@@ -10,7 +10,8 @@ class Teacher extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $hidden = ['id', 'created_at', 'updated_at'];
 
     protected static function booted()
     {
@@ -20,6 +21,11 @@ class Teacher extends Model
     public function getNamaAttribute($value)
     {
         return str_replace(' ', '&nbsp;', $value);
+    }
+
+    public function getFotoAttribute($value)
+    {
+        return $value ? "teachers/$value" : $value;
     }
 
     public function user()

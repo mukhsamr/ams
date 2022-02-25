@@ -8,47 +8,51 @@
 </div>
 <hr>
 <section class="section">
-    <div class="d-flex justify-content-between mb-2">
-        <form action="/database/students" method="get" id="search">
-            <div class="input-group w-auto">
-                <select name="field" class="form-select form-select-sm" id="field">
-                    @foreach(array_slice($columns, 0,-1) as $column)
-                    <option value="{{ $column }}" {{ $column == $field ? 'selected' : '' }}>{{ Str::headline($column) }}</option>
-                    @endforeach
-                </select>
-                <input type="text" name="keyword" class="form-control form-control-sm" placeholder="..." value="{{ request('keyword') }}">
-                <button type="submit" class="btn btn-secondary btn-sm"><i data-feather="search"></i></button>
-            </div>
-        </form>
-        <div>
-            <a href="/database/students/create" class="btn btn-dark btn-sm"><i data-feather="plus"></i></a>
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#upload">
-                <i data-feather="upload"></i>
-            </button>
-            <div class="modal fade" id="upload" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="uploadLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <form action="/database/students/import" method="post" enctype="multipart/form-data">
-                        @csrf
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="uploadLabel">Upload Siswa</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="import">Pilih File</label>
-                                    <input type="file" name="import" class="form-control form-control-sm" id="import" accept=".xlsx" required>
-                                    <small class="text-muted fw-bold"><em id="size"></em></small>
-                                </div>
-                                <a href="{{ asset('template/Template Siswa.xlsx') }}" download><small>Download Template</small></a>
-                            </div>
-                            <div class="modal-footer d-flex justify-content-between">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                <button type="submit" class="btn btn-primary">Upload</button>
-                            </div>
-                        </div>
-                    </form>
+    <div class="row g-1 mb-2">
+        <div class="col-12 col-md-6 order-2 order-md-0">
+            <form action="/database/students" method="get" id="search">
+                <div class="input-group w-auto">
+                    <select name="field" class="form-select form-select-sm" id="field">
+                        @foreach(array_slice($columns, 0,-1) as $column)
+                        <option value="{{ $column }}" {{ $column == $field ? 'selected' : '' }}>{{ Str::headline($column) }}</option>
+                        @endforeach
+                    </select>
+                    <input type="text" name="keyword" class="form-control form-control-sm" placeholder="..." value="{{ request('keyword') }}">
+                    <button type="submit" class="btn btn-secondary btn-sm"><i data-feather="search"></i></button>
                 </div>
+            </form>
+        </div>
+        <div class="col-12 col-md-6 order-1 order-md-0 text-md-end">
+            <div>
+                <a href="/database/students/create" class="btn btn-dark btn-sm"><i data-feather="plus"></i></a>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#upload">
+                    <i data-feather="upload"></i>
+                </button>
+            </div>
+        </div>
+        <div class="modal fade" id="upload" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="uploadLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <form action="/database/students/import" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="uploadLabel">Upload Siswa</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="import">Pilih File</label>
+                                <input type="file" name="import" class="form-control form-control-sm" id="import" accept=".xlsx" required>
+                                <small class="text-muted fw-bold"><em id="size"></em></small>
+                            </div>
+                            <a href="{{ asset('template/Template Siswa.xlsx') }}" download><small>Download Template</small></a>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                            <button type="submit" class="btn btn-primary">Upload</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

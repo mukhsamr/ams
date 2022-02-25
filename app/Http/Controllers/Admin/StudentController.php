@@ -16,8 +16,7 @@ class StudentController extends Controller
     {
         $student = new Student;
         $columns = $student::getColumns();
-        $where = $request->field == 'tanggal_lahir' ? 'where' : 'whereDate';
-        $students = $request->keyword ? $student->$where($request->field, 'LIKE', "%$request->keyword%") : $student;
+        $students = $request->keyword ? $student->where($request->field, 'LIKE', "%$request->keyword%") : $student;
         $data = [
             'students' => $students->paginate(15)->withQueryString(),
             'fields' => array_map(fn ($v) => ucwords(str_replace('_', ' ', $v)), $columns),

@@ -17,10 +17,10 @@ class LedgerController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $score = $user->score->load('subject', 'subGrade');
+        $scores = $user->scores();
         $data = [
-            'subjects' => $score->unique('subject_id'),
-            'subGrades' => $score->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id']),
+            'subjects' => $scores->unique('subject_id'),
+            'subGrades' => $scores->unique(fn ($v) => $v->subject_id . $v->sub_grade_id),
         ];
 
         return view('teacher.ledgers.ledger', $data);
@@ -31,14 +31,12 @@ class LedgerController extends Controller
         $build = (new Ledger)->build($request->except('_token'));
 
         if ($build['status']) {
-            $lists = new LedgerList($build['table']);
-
-            $competences = Competence::with('score')->where([
+            $competences = Competence::where([
                 'type' => $request->type,
                 'subject_id' => $request->subject
-            ])->whereRelation('score', 'sub_grade_id', $request->sub_grade)->get();
+            ])->whereRelation('scores', 'sub_grade_id', $request->sub_grade)->get();
 
-            $ledger = Ledger::where('name', $build['table'])->first();
+            $ledger = Ledger::firstWhere('name', $build['table']);
             $kkm = $competences->avg('kkm');
 
             $prev = url()->previous();
@@ -47,8 +45,11 @@ class LedgerController extends Controller
                 $role => $ledger,
                 'ledger_' . $role => $prev,
             ]);
+
+            $lists = new LedgerList($build['table']);
+
             $data = [
-                'lists' => $lists->get()->load('studentVersion.student')->sortBy(fn ($q) => $q->studentVersion->student->nama),
+                'lists' => $lists->withStudents()->orderBy('nama')->get(),
                 'fields' => $lists->getColumns(),
                 'type' => $request->type,
                 'ledger' => $ledger,
@@ -65,7 +66,7 @@ class LedgerController extends Controller
     {
         $lists = new LedgerList($request->name);
 
-        $check = array_diff(StudentVersion::where('sub_grade_id', $request->sub_grade)->pluck('id')->toArray(), $lists->pluck('student_version_id')->toArray());
+        $check = StudentVersion::where('sub_grade_id', $request->sub_grade)->whereNotIn('id', $lists->pluck('student_version_id')->toArray())->get()->toArray();
         if ($check) $this->check($check, $lists);
 
         $scores = Score::with('competence')->where([
@@ -109,7 +110,7 @@ class LedgerController extends Controller
     public function check(array $insert, $lists)
     {
         try {
-            $lists->insert(array_map(fn ($v) => ['student_version_id' => $v], $insert));
+            $lists->insert(array_map(fn ($v) => ['student_version_id' => $v['id']], $insert));
         } catch (\Throwable $e) {
             report($e);
         }

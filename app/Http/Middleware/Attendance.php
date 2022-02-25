@@ -20,15 +20,16 @@ class Attendance
      */
     public function handle(Request $request, Closure $next)
     {
-        if (auth()->user() && !(session()->has('isAbsen'))) {
+        if (($user = auth()->user()) && !(session()->has('isAbsen'))) {
+            $type = $user->level > 1 ? 'teacher' : 'student';
             $date = date('Y-m-d');
-            $setting = AttendanceSetting::first();
+            $setting = AttendanceSetting::$type();
             $holiday = Calendar::isHoliday($date, $setting);
 
             if ($holiday) {
                 session($holiday);
             } else {
-                $isAbsen = auth()->user()->attendance->firstWhere('date', $date);
+                $isAbsen = auth()->user()->attendances->firstWhere('date', $date);
 
                 session([
                     'setting' => $setting,

@@ -8,7 +8,7 @@ $(document).ready(function () {
                 const html5QrCode = new Html5Qrcode("reader");
 
                 html5QrCode.start(
-                    cameraId,
+                    { facingMode: "environment" },
                     {
                         fps: 10,
                         qrbox: 250
@@ -48,9 +48,15 @@ $(document).ready(function () {
                     .catch(err => {
                         $('#message').text(`Unable to start scanning, error: ${err}`);
                     });
+
+                // Close camera
+                $('#stopQr').click(function () {
+                    html5QrCode.stop();
+                });
             }
         }).catch(err => {
             $('#message').text('Kamera tidak terdeteksi');
         });
     });
+
 });

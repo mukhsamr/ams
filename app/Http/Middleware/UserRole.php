@@ -30,7 +30,7 @@ class UserRole
 
         if ($user->level === '0') return $next($request);
         if ($user->level < $roles[$role]) return abort('403');
-        if ($roles[$role] === 3 && !Guardian::firstWhere('user_id', $user->id)) return abort('403');
+        if ($user->level === 3 && !Guardian::firstWhere('user_id', $user->id)) return abort('403');
 
         return $next($request);
     }

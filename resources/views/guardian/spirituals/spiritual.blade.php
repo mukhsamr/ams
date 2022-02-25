@@ -8,6 +8,14 @@
 </div>
 <hr>
 <section class="section">
+    <form action="/guardian/spirituals" method="get" class="row g-1 mb-2">
+        <div class="col-10 col-md-4">
+            <input type="text" name="keyword" class="form-control form-control-sm" placeholder="Nama..." value="{{ $keyword }}">
+        </div>
+        <div class="col-2 col-md-2">
+            <button type="submit" class="btn btn-dark btn-sm"><i data-feather="search"></i></button>
+        </div>
+    </form>
 
     @if($alert = session('alert'))
     <x-alert :type="$alert['type']" :message="$alert['message']" />
@@ -33,71 +41,20 @@
                 <tbody>
                     @foreach($spirituals as $spiritual)
                     <tr>
-                        <td>{!! $spiritual->studentVersion->student->nama !!}</td>
+                        <td>{!! $spiritual->nama !!}</td>
                         <td>
-                            <ul>
-                                @foreach($checked = $spiritual->studentVersion->spiritual->pluck('list', 'id') as $list)
+                            <ul class="m-0">
+                                @foreach(explode(',', $spiritual->spirituals) as $list)
                                 <li>{{ $list }}</li>
                                 @endforeach
                             </ul>
                         </td>
-                        <td>{{ $spiritual->spiritual->list ?? '' }}</td>
+                        <td>{{ $spiritual->spiritual }}</td>
                         <td><span class="short">{{ $spiritual->comment }}</span></td>
                         <td class="text-center">{{ $spiritual->predicate }}</td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#edit-{{ $spiritual->id }}">
-                                <i data-feather="edit"></i>
-                            </button>
+                            <a href="/guardian/spirituals/edit/{{ $spiritual->id }}" class="btn btn-info btn-sm load-modal-spiritual" data-target="#edit"><i data-feather="edit"></i></a>
                         </td>
-                        <div class="modal fade" id="edit-{{ $spiritual->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="edit-{{ $spiritual->id }}Label" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form action="/guardian/spirituals" method="post">
-                                        @csrf @method('put')
-                                        <input type="hidden" name="id" value="{{ $spiritual->id }}">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="edit-{{ $spiritual->id }}Label">{!! $spiritual->studentVersion->student->nama !!}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="form-group">
-                                                <label class="form-label fw-bold">Selalu dilakukan</label>
-                                                @foreach($lists as $list)
-                                                <div class="form-check">
-                                                    <input class="form-check-input" name="spiritual[]" type="checkbox" data-id="{{ $spiritual->id }}" value="{{ $list->id }}" id="list-{{ $list->id . '-' . $spiritual->id }}" {{ $checked->has($list->id) ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="list-{{ $list->id . '-' . $spiritual->id }}">
-                                                        {{ $list->list }}
-                                                    </label>
-                                                </div>
-                                                @endforeach
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label fw-bold">Sudah dilakukan</label>
-                                                <select name="spiritual_id" class="form-select form-select-sm" id="sel-{{ $spiritual->id }}" required>
-                                                    <option hidden></option>
-                                                    @foreach($lists as $list)
-                                                    <option id="opt-list-{{ $list->id . '-' . $spiritual->id }}" value="{{ $list->id }}" {{ $checked->has($list->id) ? 'hidden' : '' }} {{ $spiritual->spiritual_id == $list->id ? 'selected' : '' }}>{{ $list->list }}</option>
-
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label fw-bold">Predikat</label>
-                                                <select name="predicate" class="form-select form-select-sm">
-                                                    @foreach(['A', 'B', 'C', 'D'] as $p)
-                                                    <option value="{{ $p }}" {{ $spiritual->predicate == $p ? 'selected' : '' }}>{{ $p }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer d-flex justify-content-between">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                            <button type="submit" class="btn btn-info">Simpan</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     </tr>
                     @endforeach
                 </tbody>
@@ -106,6 +63,7 @@
     </div>
 </section>
 
+<div id="modal"></div>
 @endsection
 
 @push('scripts')

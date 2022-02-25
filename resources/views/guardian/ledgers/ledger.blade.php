@@ -2,36 +2,42 @@
 
 @section('content')
 
+@php
+$table = session(request()->path());
+@endphp
+
 <div class="page-title">
     <h3>Ledger</h3>
     <p class="text-subtitle text-muted">Rekap nilai harian <strong>{{ $subGrade->sub_grade }}</strong>.</p>
-
 </div>
+
 <hr>
 <section class="section">
-    <div class="d-flex justify-content-between mb-2">
-        <form action="/teacher/ledgers" method="post" class="d-flex" id="searchLedger">
-            @csrf
-            <select name="subject" class="form-select form-select-sm w-auto" id="subject">
+    <form action="/teacher/ledgers" method="post" class="row g-1 mb-2" id="searchLedger">
+        @csrf
+        <div class="col-6 col-md-4">
+            <select name="subject" class="form-select form-select-sm" id="subject-search">
                 @foreach($subjects as $subject)
-                <option value="{{ $subject->id }}" data-send="{{ $subject->id }}" {{ (session(request()->path())->subject_id ?? false) == $subject->id ? 'selected' : '' }}>{{ $subject->subject }}</option>
+                <option value="{{ $subject->id }}" {{ selected(($table->subject_id ?? false) == $subject->id)}}>{{ $subject->subject }}</option>
                 @endforeach
             </select>
-            <input type="hidden" name="sub_grade" value="{{ $subGrade->id }}">
-            <select name="type" class="form-select form-select-sm w-auto ms-1" id="type">
+        </div>
+        <input type="hidden" name="sub_grade" value="{{ $subGrade->id }}">
+        <div class="col-6 col-md-2">
+            <select name="type" class="form-select form-select-sm" id="type-search">
                 <option hidden></option>
-                <option value="1" {{ (session(request()->path())->type ?? false) == 1 ? 'selected' : '' }}>Pengetahuan</option>
-                <option value="2" {{ (session(request()->path())->type ?? false) == 2 ? 'selected' : '' }}>Keterampilan</option>
+                <option value="1" {{ selected(($table->type ?? false) == 1) }}>Pengetahuan</option>
+                <option value="2" {{ selected(($table->type ?? false) == 2) }}>Keterampilan</option>
             </select>
-        </form>
-    </div>
+        </div>
+    </form>
 
-    @if(($ledger = session(request()->path())) && session('ledger_' . request()->path()) == url()->current())
+    @if($table && session('ledger_' . request()->path()) == url()->current())
     <form action="/teacher/ledgers/load" method="post" id="ledger-load" data-show="1">
         @csrf
-        <input type="hidden" name="subject" value="{{ $ledger->subject_id }}">
-        <input type="hidden" name="sub_grade" value="{{ $ledger->sub_grade_id }}">
-        <input type="hidden" name="type" value="{{ $ledger->type }}">
+        <input type="hidden" name="subject" value="{{ $table->subject_id }}">
+        <input type="hidden" name="sub_grade" value="{{ $table->sub_grade_id }}">
+        <input type="hidden" name="type" value="{{ $table->type }}">
     </form>
     @endif
 

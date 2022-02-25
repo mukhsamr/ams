@@ -15,6 +15,7 @@ class CreateAttendanceSettingsTable extends Migration
     {
         Schema::create('attendance_settings', function (Blueprint $table) {
             $table->tinyIncrements('id');
+            $table->string('type');
             $table->time('start');
             $table->time('end');
             $table->boolean('sat')->nullable();

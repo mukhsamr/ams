@@ -7,52 +7,61 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\AttendanceSetting;
 use App\Models\Calendar;
-use App\Models\Teacher;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class AttendanceController extends Controller
 {
-    public function index(Request $request)
+    public function student(Request $request)
     {
         $filter = $request->filter ?? date('Y-m-d');
-        $setting = AttendanceSetting::first();
+        $setting = AttendanceSetting::student();
 
         $holiday = Calendar::isHoliday($filter, $setting);
-        if (!$holiday) {
-            $type = Teacher::class;
-            $attendances = Attendance::whereRelation('user', 'userable_type', $type)->whereDate('date', $filter)->get();
-            $users = User::where('userable_type', $type)->get();
-
-            foreach ($users as $user) {
-                if ($attendances->firstWhere('user_id', $user->id)) continue;
-
-                $attendances->push(new Attendance([
-                    'date' => $filter,
-                    'user_id' => $user->id,
-                ]));
-            }
-        }
-
+        $attendances = Attendance::select('attendances.*', 'users.id as user_id', 'students.nama')->withStudent($filter);
         $qrcode = QrCode::size(150)->generate($setting->qrcode);
         $data = [
-            'holiday' => $holiday,
             'filtered' => $filter,
+            'holiday' => $holiday,
             'setting' => $setting,
             'qrcode' => $qrcode,
-            'attendances' => $holiday ? '' : $attendances->load('user.userable:id,nama')
+            'attendances' => $holiday ? null : $attendances->orderBy('hours')->paginate(10)->withQueryString()
         ];
-        return view('operator.attendances.attendance', $data);
+        return view('operator.attendances.student', $data);
     }
+
+    // ===
+
+    public function teacher(Request $request)
+    {
+        $filter = $request->filter ?? date('Y-m-d');
+        $setting = AttendanceSetting::teacher();
+
+        $holiday = Calendar::isHoliday($filter, $setting);
+        $attendances = Attendance::select('attendances.*', 'users.id as user_id', 'teachers.nama')->withTeacher($filter);
+        $qrcode = QrCode::size(150)->generate($setting->qrcode);
+        $data = [
+            'filtered' => $filter,
+            'holiday' => $holiday,
+            'setting' => $setting,
+            'qrcode' => $qrcode,
+            'attendances' => $holiday ? null : $attendances->orderBy('hours')->paginate(10)->withQueryString()
+        ];
+        return view('operator.attendances.teacher', $data);
+    }
+
+    // ===
 
     public function setting(Request $request)
     {
         $request->sat ??= $request->merge(['sat' => null]);
         $request->sun ??= $request->merge(['sun' => null]);
+
+        $type = $request->type;
+        $setting = AttendanceSetting::$type();
         try {
-            AttendanceSetting::first()->update($request->input());
+            $setting->update($request->input());
             $alert['type'] = 'success';
         } catch (\Throwable $th) {
             report($th);
@@ -63,18 +72,18 @@ class AttendanceController extends Controller
         return back()->with('alert', $alert);
     }
 
-    public function qrcode()
+    public function qrcode($type)
     {
         $path = storage_path('app/public/img/qrcode.png');
-        QrCode::format('png')->size(500)->generate(AttendanceSetting::first()->qrcode, $path);
+        QrCode::format('png')->size(500)->generate(AttendanceSetting::$type()->qrcode, $path);
 
         return response()->download($path);
     }
 
-    public function updateQrcode()
+    public function updateQrcode($type)
     {
         try {
-            AttendanceSetting::first()->update(['qrcode' => bcrypt('nqm' . time() . 'education')]);
+            AttendanceSetting::$type()->update(['qrcode' => bcrypt('nqm' . time() . 'education')]);
             $alert['type'] = 'success';
         } catch (\Throwable $th) {
             report($th);
@@ -92,6 +101,7 @@ class AttendanceController extends Controller
             Attendance::updateOrCreate(['id' => $request->id], $request->input());
             $alert['type'] = 'success';
         } catch (\Throwable $th) {
+            dd();
             report($th);
             $alert['type'] = 'danger';
         }
@@ -100,11 +110,15 @@ class AttendanceController extends Controller
         return back()->with('alert', $alert);
     }
 
-    public function export(Request $request)
+    public function studentExport(Request $request)
     {
-        $type = Teacher::class;
+        $name = 'Absensi Siswa ' . formatDate($request->start) . ' sampai ' . formatDate($request->end) . '.xlsx';
+        return Excel::download(new AttendanceExport($request, 'students'), $name);
+    }
 
-        $file = "Absensi $request->start sampai $request->end.xlsx";
-        return Excel::download(new AttendanceExport($request, $type), $file);
+    public function teacherExport(Request $request)
+    {
+        $name = 'Absensi Guru ' . formatDate($request->start) . ' sampai ' . formatDate($request->end) . '.xlsx';
+        return Excel::download(new AttendanceExport($request, 'teachers'), $name);
     }
 }

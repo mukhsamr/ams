@@ -26,4 +26,26 @@ class Guardian extends Model
     {
         return $this->belongsTo(SubGrade::class);
     }
+
+    // === 
+
+    public function scopeWithUser($query)
+    {
+        return $query->addSelect([
+            'nama' => Teacher::select('nama')
+                ->whereHas('user', function ($query) {
+                    $query->whereColumn('users.id', 'guardians.user_id');
+                })
+                ->limit(1)
+        ]);
+    }
+
+    public function scopeWithSubGrade($query)
+    {
+        return $query->addSelect([
+            'subGrade' => SubGrade::select('sub_grade')
+                ->whereColumn('sub_grades.id', 'guardians.sub_grade_id')
+                ->limit(1)
+        ]);
+    }
 }
