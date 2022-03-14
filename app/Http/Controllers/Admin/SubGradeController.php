@@ -12,6 +12,7 @@ class SubGradeController extends Controller
     public function index()
     {
         return view('admin.subGrades.subGrade', [
+            'grades' => Grade::all(),
             'subGrades' => SubGrade::with('grade')->get(),
         ]);
     }

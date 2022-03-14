@@ -10,7 +10,8 @@ $(document).ready(function () {
             // Password default
             $(':checkbox[types = default]').change(function () {
                 const prop = $(this).prop('checked');
-                $('#password').attr('disabled', prop);
+                console.log(prop);
+                $('#password-create').attr('disabled', prop);
             });
 
             // Password not change

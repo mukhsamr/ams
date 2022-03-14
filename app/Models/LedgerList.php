@@ -78,17 +78,15 @@ class LedgerList extends Model
 
     public function getPRE($value, $kkm)
     {
-        if ($value) {
-            $interval = (100 - $kkm) / 3;
-            if ($value >= 100 - $interval) {
-                return 'A';
-            } elseif ($value >= 100 - $interval * 2) {
-                return 'B';
-            } elseif ($value >= 100 - $interval * 3) {
-                return 'C';
-            } else {
-                return 'D';
-            }
+        $interval = (100 - $kkm) / 3;
+        if ($value >= 100 - $interval) {
+            return 'A';
+        } elseif ($value >= 100 - $interval * 2) {
+            return 'B';
+        } elseif ($value >= 100 - $interval * 3) {
+            return 'C';
+        } else {
+            return 'D';
         }
     }
 

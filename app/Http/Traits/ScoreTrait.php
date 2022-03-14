@@ -18,7 +18,7 @@ trait ScoreTrait
 
         if (Competence::find($competence)->type == '1') {
             $table->float('rata_rata')->nullable();
-            $table->float('nilai')->nullable();
+            $table->float('nilai')->default(0);
             $table->float('r1')->nullable();
             $table->float('r2')->nullable();
             $table->float('nilai_akhir')->nullable();

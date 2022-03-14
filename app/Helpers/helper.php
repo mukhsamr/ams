@@ -20,6 +20,19 @@ function ledgerColor($score, $kkm)
     return ($score < $kkm) ? 'text-warning fw-bold' : '';
 };
 
+function ledgerPreColor($score)
+{
+    if ($score == 'A') {
+        return 'text-primary fw-bold';
+    } elseif ($score == 'B') {
+        return 'text-success fw-bold';
+    } elseif ($score == 'C') {
+        return 'text-warning fw-bold';
+    } else {
+        return 'text-danger fw-bold';
+    }
+};
+
 function checked($cond)
 {
     return $cond ? 'checked' : null;

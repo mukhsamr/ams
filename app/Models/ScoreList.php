@@ -109,7 +109,7 @@ class ScoreList extends Model
     {
         $fields = $this->getFieldsScore($type);
         if (!Schema::hasColumn($this->table, $column)) {
-            Schema::table($this->table, fn (Blueprint $table) => $table->float($column)->nullable()->after($fields->last() ?: 'student_version_id'));
+            Schema::table($this->table, fn (Blueprint $table) => $table->float($column)->default(0)->after($fields->last() ?: 'student_version_id'));
             $fields = $this->getFieldsScore($type);
         }
         $kkm = $this->getCompetence()->kkm;

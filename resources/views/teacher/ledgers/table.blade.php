@@ -21,7 +21,8 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-4">Aspek</div>
-                            <div class="col-md-8"><strong>{{ $type == '1' ? 'Pengetahuan' : 'Keterampilan' }}</strong></div>
+                            <div class="col-md-8"><strong>{{ $type == '1' ? 'Pengetahuan' : 'Keterampilan' }}</strong>
+                            </div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-4">KKM</div>
@@ -46,10 +47,14 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <ul class="ps-3 m-0">
-                                            <li><strong class="text-primary">A</strong> = {{ $A = ceil(100 - $interval) }} - 100</li>
-                                            <li><strong class="text-success">B</strong> = {{ $B = ceil(100 - $interval * 2) .' - '. (floatval($A) - 1) }}</li>
-                                            <li><strong class="text-warning">C</strong> = {{ $C = ceil(100 - $interval * 3) .' - '. (floatval($B) - 1) }}</li>
-                                            <li><strong class="text-danger">D</strong> = {{ '0 - '. (floatval($C) - 1) }}</li>
+                                            <li><strong class="text-primary">A</strong> = {{ $A = ceil(100 - $interval)
+                                                }} - 100</li>
+                                            <li><strong class="text-success">B</strong> = {{ $B = ceil(100 - $interval *
+                                                2) .' - '. (floatval($A) - 1) }}</li>
+                                            <li><strong class="text-warning">C</strong> = {{ $C = ceil(100 - $interval *
+                                                3) .' - '. (floatval($B) - 1) }}</li>
+                                            <li><strong class="text-danger">D</strong> = {{ '0 - '. (floatval($C) - 1)
+                                                }}</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -77,7 +82,8 @@
         <button type="button" class="btn btn-sm btn-info ms-auto" data-bs-toggle="modal" data-bs-target="#edit">
             <i data-feather="edit"></i>
         </button>
-        <div class="modal fade" id="edit" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLabel" aria-hidden="true">
+        <div class="modal fade" id="edit" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="editLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <form action="/teacher/ledgers" method="post">
@@ -100,7 +106,9 @@
                                     <tr class="text-center">
                                         <td class="text-start">{!! $list->nama !!}</td>
                                         <td class="text-center w-25">
-                                            <input type="number" name="pas[{{ $list->student_version_id }}]" class="form-control form-control-sm" step="0.1" min="0" max="100" value="{{ $list->pas }}">
+                                            <input type="number" name="pas[{{ $list->student_version_id }}]"
+                                                class="form-control form-control-sm" step="0.1" min="0" max="100"
+                                                value="{{ $list->pas }}">
                                         </td>
                                     </tr>
                                     @endforeach
@@ -108,7 +116,8 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary me-auto" data-bs-dismiss="modal">Tutup</button>
+                            <button type="button" class="btn btn-secondary me-auto"
+                                data-bs-dismiss="modal">Tutup</button>
                             <button type="submit" class="btn btn-primary" id="btn-submit">Simpan</button>
                         </div>
                     </form>
@@ -138,6 +147,8 @@
                 @foreach($fields as $field)
                 @if($field == 'deskripsi')
                 <td class="text-start"><span class="short" data-short="30">{{ $list->$field }}</span></td>
+                @elseif($field == 'pre')
+                <td class="{{ ledgerPreColor($list->$field) }}">{!! $list->$field !!}</td>
                 @else
                 <td class="{{ ledgerColor($list->$field, $kkm) }}">{!! $list->$field !!}</td>
                 @endif
