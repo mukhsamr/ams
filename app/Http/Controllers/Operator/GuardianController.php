@@ -13,10 +13,11 @@ class GuardianController extends Controller
 {
     public function index()
     {
-        $guardians = Guardian::with(['user.userable', 'subGrade'])->orderBy('sub_grade_id')->get();
+        $guardians = Guardian::withUser()->withSubGrade()->get();
+
         $data = [
             'guardians' => $guardians,
-            'users'     => User::with('userable')->where('level', '>', 3)->get()->sortBy(fn ($q) => $q->userable->nama),
+            'users'     => User::select('users.id', 'nama')->where('level', '>', 3)->withTeacher()->get(),
             'subGrades' => SubGrade::all(),
         ];
 
@@ -62,7 +63,7 @@ class GuardianController extends Controller
             $alert['type'] = 'danger';
         }
 
-        $alert['message'] = 'update wali kelas ' . $guardian->subGrade->sub_grade;
+        $alert['message'] = 'update wali kelas';
         return back()->with('alert', $alert);
     }
 

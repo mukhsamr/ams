@@ -17,7 +17,7 @@ class Grade extends Model
         static::addGlobalScope(fn ($q) => $q->orderBy('grade'));
     }
 
-    public function subGrade()
+    public function subGrades()
     {
         return $this->hasMany(SubGrade::class);
     }

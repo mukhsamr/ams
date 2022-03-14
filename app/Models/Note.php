@@ -16,16 +16,38 @@ class Note extends Model
         return $this->belongsTo(StudentVersion::class);
     }
 
-    public function scopeGetNotes($query, $subGrade)
+    public function scopeWithStudent($query)
     {
-        return $query
-            ->with([
-                'studentVersion:id,student_id',
-                'studentVersion.student:id,nama'
-            ])->whereRelation(
-                'studentVersion',
-                'sub_grade_id',
-                $subGrade->id
-            )->get()->sortBy(fn ($q) => $q->studentVersion->student->nama);
+        return $query->addSelect([
+            'user_id' => User::select('id')
+                ->whereHasMorph('userable', [Student::class], function ($query) {
+                    $query->whereHas('studentVersion', function ($query) {
+                        $query->whereColumn('id', 'student_version_id');
+                    });
+                })
+                ->limit(1),
+            'nama' => Student::select('nama')
+                ->whereHas('studentVersion', function ($query) {
+                    $query->whereColumn('id', 'student_version_id');
+                })
+                ->limit(1),
+        ]);
     }
+
+    // public function scopeWithAttendance($query)
+    // {
+    //     return $query
+    //         ->addSelect([
+    //             'student_id' => StudentVersion::select('student_id')
+    //                 ->whereColumn('id', 'notes.student_version_id')
+    //                 ->limit(1),
+    //             'Tepat Waktu' => Attendance::selectRaw('count(status) as `Tepat Waktu`')
+    //                 ->whereColumn('attendances.student_id', 'student_id')
+    //                 ->where('status', 'Tepat Waktu')
+    //                 ->groupBy('status')
+    //         ])
+    //         ->selectRaw('count(*) as status')
+    //         ->join('attendances', 'attendances.user_id', '=', 'user_id')
+    //         ->groupBy('status');
+    // }
 }

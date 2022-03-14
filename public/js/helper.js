@@ -29,10 +29,19 @@ $(document).ready(function () {
         $(this).parent().html(html);
     });
 
-
     // File size
     $(':file').change(function () {
         const size = (this.files[0].size / 1000) + ' kb';
         $('#size').text(size);
+    });
+
+    // Ajax modal
+    $('a.load-modal').click(function (e) {
+        e.preventDefault();
+        const id = $(this).data('target');
+
+        $('#modal').load($(this).attr('href'), $(this).serialize(), function (response, status, request) {
+            $(id).modal('show');
+        });
     });
 });

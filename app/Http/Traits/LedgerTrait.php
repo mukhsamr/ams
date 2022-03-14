@@ -17,8 +17,8 @@ trait LedgerTrait
 
         $table->float('rph')->nullable();
         if ($type == 1) {
-            $table->float('pas')->nullable();
-            $table->float('hpa')->nullable();
+            $table->float('pas')->default(0);
+            $table->float('hpa')->default(0);
         }
         $table->enum('pre', ['A', 'B', 'C', 'D'])->nullable();
         $table->text('deskripsi')->nullable();

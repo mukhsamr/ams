@@ -11,20 +11,25 @@ use Illuminate\Support\Facades\Storage;
 
 class CompetenceController extends Controller
 {
-    public function index($subject = null, $grade = null)
+    public function index(Request $request)
     {
         $user = auth()->user();
 
-        $subjects = $user->subject;
-        $grades = $user->subGrade->unique('grade_id')->pluck('grade');
+        $subjects = $user->subjects;
+        $grades = $user->grades();
 
-        $subject ??= $subjects->first()->id ?? null;
-        $grade ??= $grades->first()->id ?? null;
+        $subject = $request->subject ?? $subjects->first()->id ?? null;
+        $grade = $request->grade ?? $grades->first()->id ?? null;
+
+        $competences = Competence::withGrade()->where([
+            'subject_id' => $subject,
+            'grade_id' => $grade,
+        ])->withUsed()->paginate(10)->withQueryString();
 
         $data = [
             'subjects' => $subjects,
             'grades' => $grades,
-            'competences' => $user->getCompetence($subject, $grade)->get(),
+            'competences' => $competences,
             'selected' => [
                 'subject' => $subject,
                 'grade' => $grade,
@@ -45,6 +50,19 @@ class CompetenceController extends Controller
 
         $alert['message'] = 'tambah kompetensi';
         return back()->with('alert', $alert);
+    }
+
+    public function edit($id)
+    {
+        $user = auth()->user();
+        $subjects = $user->subjects;
+        $grades = $user->grades();
+
+        return view('teacher.competences.modal-edit', [
+            'subjects' => $subjects,
+            'grades' => $grades,
+            'competence' => Competence::withUsed()->find($id),
+        ]);
     }
 
     public function update(CompetenceRequest $request)

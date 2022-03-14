@@ -9,12 +9,13 @@ class ScoreController extends Controller
 {
     public function index()
     {
-        $scores = Score::all();
+        $scores = Score::joinAll()->get();
         $data = [
-            'subjects' => $scores->unique('subject_id')->load('subject'),
-            'subGrades' => $scores->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id'])->load('subGrade'),
-            'competences' => $scores->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id'] . $v['competence_id'])->load('competence')
+            'subjects' => $scores->unique('subject_id'),
+            'subGrades' => $scores->unique(fn ($v) => $v->subject_id . $v->sub_grade_id),
+            'competences' => $scores->unique(fn ($v) => $v->subject_id . $v->sub_grade_id . $v->competence_id),
         ];
+
         return view('operator.scores.score', $data);
     }
 }

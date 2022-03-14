@@ -16,6 +16,7 @@ class CreateDevsTable extends Migration
         Schema::create('devs', function (Blueprint $table) {
             $table->increments('id');
             $table->string('nama');
+            $table->string('foto');
         });
     }
 

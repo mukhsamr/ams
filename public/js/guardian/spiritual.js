@@ -1,10 +1,20 @@
 $(document).ready(function () {
-    $(':checkbox').change(function () {
-        const data = $(this).data('id');
-        const id = $(this).attr('id');
-        const prop = $(this).prop('checked');
+    // Ajax modal
+    $('a.load-modal-spiritual').click(function (e) {
+        e.preventDefault();
+        const id = $(this).data('target');
 
-        $(`#sel-${data}`).val('');
-        $(`#sel-${data} > #opt-${id}`).attr('hidden', prop);
+        $('#modal').load($(this).attr('href'), $(this).serialize(), function (response, status, request) {
+            $(id).modal('show');
+
+            // Filter checkbox
+            $(':checkbox').change(function () {
+                const id = $(this).attr('id');
+                const prop = $(this).prop('checked');
+
+                $(`#sel`).val('');
+                $(`#sel > #opt-${id}`).attr('hidden', prop);
+            });
+        });
     });
 });

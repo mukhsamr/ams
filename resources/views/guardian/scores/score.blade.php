@@ -2,43 +2,49 @@
 
 @section('content')
 
+@php
+$table = session(request()->path());
+@endphp
+
 <div class="page-title">
     <h3>Harian</h3>
     <p class="text-subtitle text-muted">Penilaian harian siswa kelas <strong>{{ $subGrade->sub_grade }}</strong></p>
 </div>
 <hr>
 <section class="section">
-    <div class="d-flex justify-content-between mb-3">
-        <form action="/teacher/scores/search" method="get" class="d-flex" id="search-score">
+    <form action="/teacher/scores/search" method="get" class="row g-1 mb-2" id="search-score">
+        <div class="col-8 col-md-4">
             <input type="hidden" name="sub_grade" value="{{ $subGrade->id }}">
-            <select name="subject" class="form-select form-select-sm w-auto" id="subject" required>
+            <select name="subject" class="form-select form-select-sm" id="subject-search" required>
                 <option hidden></option>
                 @foreach($subjects as $subject)
-                <option data-send="{{ $subject->id }}" value="{{ $subject->id }}" {{ (session(request()->path())->subject_id ?? false) == $subject->id ? 'selected' : '' }}>
+                <option data-subject="{{ $subject->id }}" value="{{ $subject->id }}" {{ selected(($table->subject_id ?? false) == $subject->id) }}>
                     {{ $subject->subject }}
                 </option>
                 @endforeach
             </select>
-            <select name="competence" class="form-select form-select-sm w-auto ms-2" id="competence" required>
+        </div>
+        <div class="col-4 col-md-2">
+            <select name="competence" class="form-select form-select-sm" id="competence-search" required>
                 <option hidden></option>
                 @foreach($competences as $competence)
-                <option hidden value="{{ $competence->id }}" data-subject="{{ $competence->subject_id }}" {{ (session(request()->path())->competence_id ?? false) == $competence->id ? 'selected' : '' }}>
+                <option hidden value="{{ $competence->id }}" subject="{{ $competence->subject_id }}" {{ selected(($table->competence_id ?? false) == $competence->id) }}>
                     {{ $competence->format_competence }}
                 </option>
                 @endforeach
             </select>
-        </form>
+        </div>
+    </form>
 
-        @if(($table = session(request()->path())) && session('score_' . request()->path()) == url()->current())
-        <form action="/teacher/scores/show" method="post" id="score-show" data-show="1">
-            @csrf
-            <input type="hidden" name="name" value="{{ $table->name }}">
-            <input type="hidden" name="subject_id" value="{{ $table->subject_id }}">
-            <input type="hidden" name="sub_grade_id" value="{{ $table->sub_grade_id }}">
-            <input type="hidden" name="competence_id" value="{{ $table->competence_id }}">
-        </form>
-        @endif
-    </div>
+    @if($table && session('score_' . request()->path()) == url()->current())
+    <form action="/teacher/scores/show" method="post" id="score-show" data-show="1">
+        @csrf
+        <input type="hidden" name="name" value="{{ $table->name }}">
+        <input type="hidden" name="subject_id" value="{{ $table->subject_id }}">
+        <input type="hidden" name="sub_grade_id" value="{{ $table->sub_grade_id }}">
+        <input type="hidden" name="competence_id" value="{{ $table->competence_id }}">
+    </form>
+    @endif
 
     @if($alert = session('alert'))
     <x-alert :type="$alert['type']" :message="$alert['message']" warning="Nilai sudah ada." />

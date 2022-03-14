@@ -26,6 +26,30 @@ class ScoreList extends Model
         return $this->belongsTo(StudentVersion::class, 'student_version_id');
     }
 
+    public function withStudents()
+    {
+        return $this->addSelect([
+            'student_id' => StudentVersion::select('student_id')
+                ->whereColumn('id', $this->getTable() . '.student_version_id')
+                ->limit(1),
+            'nama' => Student::select('nama')
+                ->whereColumn('id', 'student_id')
+                ->limit(1),
+        ])->orderBy('nama');
+    }
+
+    public function scopeWithList($query, $score, $name)
+    {
+        $table = $score->name;
+        $competence = competence($score);
+        $column = $score->type == 1 ? 'nilai_bc' : 'nilai_akhir';
+
+        return $query->addSelect("$table.$column as $competence")
+            ->join($table, $table . '.student_version_id', '=', $name . '.student_version_id');
+    }
+
+    // ===
+
     public function getFieldsScore($type, $fields = null)
     {
         $fields ??= Schema::getColumnListing($this->table);
@@ -35,7 +59,6 @@ class ScoreList extends Model
         return collect($fields)->diff($diff);
     }
 
-    // 
     public function getColumn($column)
     {
         if (Schema::hasColumn($this->table, $column)) {
@@ -86,7 +109,7 @@ class ScoreList extends Model
     {
         $fields = $this->getFieldsScore($type);
         if (!Schema::hasColumn($this->table, $column)) {
-            Schema::table($this->table, fn (Blueprint $table) => $table->float($column)->nullable()->after($fields->last() ?: 'student_version_id'));
+            Schema::table($this->table, fn (Blueprint $table) => $table->float($column)->default(0)->after($fields->last() ?: 'student_version_id'));
             $fields = $this->getFieldsScore($type);
         }
         $kkm = $this->getCompetence()->kkm;
@@ -96,10 +119,10 @@ class ScoreList extends Model
                 $this->where('student_version_id', $id)->update([$column => $score]);
                 if ($columns = $fields->toArray()) {
                     $row = $this->where('student_version_id', $id);
-                    $rata2 = $this->getRataRata($row->first($columns));
+                    $rata2 = $this->getRataRata($row->first($columns)->getAttributes());
                     if ($type == 1) {
                         $update['rata_rata'] = $rata2;
-                        $nilaiAkhir = $this->getNilaiAkhir($row->first(['nilai', 'r1', 'r2'])->toArray(), $kkm);
+                        $nilaiAkhir = $this->getNilaiAkhir($row->first(['nilai', 'r1', 'r2'])->getAttributes(), $kkm);
                         $update['nilai_akhir'] = $nilaiAkhir;
                         $update['nilai_bc'] = $this->getNilaiBc($rata2, $nilaiAkhir);
                         $update['keterangan'] = $update['nilai_bc'] !== null ? $update['nilai_bc'] >= $kkm : null;
@@ -142,16 +165,14 @@ class ScoreList extends Model
                     }
                 } else {
                     $update = $type == 1 ? [
-                        'rata_rata',
-                        'nilai_akhir',
-                        'nilai_bc',
-                        'keterangan'
+                        'rata_rata' => null,
+                        'nilai_akhir' => null,
+                        'nilai_bc' => null,
+                        'keterangan' => null
                     ] : [
-                        'nilai_akhir',
-                        'keterangan'
+                        'nilai_akhir' => null,
+                        'keterangan' => null
                     ];
-
-                    $update = array_map(fn ($v) => [$v => null], $update);
                 }
                 $status[] = true;
 

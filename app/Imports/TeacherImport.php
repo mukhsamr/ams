@@ -30,6 +30,7 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         foreach ($combined as $key => $column) {
             $data[$column] = $row[$key];
         }
+
         return new Teacher($data);
     }
 
@@ -45,17 +46,21 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     {
         ++$this->total;
 
-        $data['tanggal_lahir'] = $data['tanggal_lahir'] ? $this->transformDate($data['tanggal_lahir'])->toDateString() : null;
-        $data['mulai_bekerja'] = $data['mulai_bekerja'] ? $this->transformDate($data['mulai_bekerja'])->toDateString() : null;
+        $data['tanggal_lahir'] = $data['tanggal_lahir'] ? $this->transformDate($data['tanggal_lahir']) : null;
+        $data['mulai_bekerja'] = $data['mulai_bekerja'] ? $this->transformDate($data['mulai_bekerja']) : null;
         return $data;
     }
 
     public function transformDate($value, $format = 'Y-m-d')
     {
         try {
-            return Carbon::instance(Date::excelToDateTimeObject($value));
+            return Carbon::instance(Date::excelToDateTimeObject($value))->toDateString();
         } catch (\ErrorException $e) {
-            return Carbon::createFromFormat($format, $value);
+            try {
+                return Carbon::createFromFormat($format, $value)->toDateString();
+            } catch (\Throwable $th) {
+                return null;
+            }
         }
     }
 

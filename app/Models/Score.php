@@ -13,42 +13,11 @@ class Score extends Model
 {
     use HasFactory, ScoreTrait;
 
-    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $guarded = ['id'];
 
     protected static function booted()
     {
         static::addGlobalScope(new VersionScope);
-    }
-
-    public function build(array $request)
-    {
-        $version = session('version')->id;
-
-        array_shift($request);
-        $score = '__s_' . $version . '_' . implode('_', $request);
-
-        if (!Schema::hasTable($score)) {
-            try {
-                Schema::create($score, fn (Blueprint $table) => $this->generate($table, $request['competence']));
-
-                $insert = [
-                    'name'          => $score,
-                    'subject_id'    => $request['subject'],
-                    'sub_grade_id'  => $request['sub_grade'],
-                    'competence_id' => $request['competence'],
-                    'version_id'    => $version,
-                ];
-
-                $this->insert($insert);
-                return ['status' => 'success', 'table' => $score];
-            } catch (\Throwable $e) {
-                report($e);
-                Schema::dropIfExists($score);
-                return ['status' => 'error', 'message' => $e];
-            }
-        } else {
-            return ['status' => 'warning', 'message' => 'exist'];
-        }
     }
 
     public function subGrade()
@@ -56,18 +25,77 @@ class Score extends Model
         return $this->belongsTo(SubGrade::class);
     }
 
-    public function competence()
-    {
-        return $this->belongsTo(Competence::class);
-    }
-
     public function subject()
     {
         return $this->belongsTo(Subject::class);
     }
 
+    public function competence()
+    {
+        return $this->belongsTo(Competence::class);
+    }
+
     public function version()
     {
         return $this->belongsTo(Version::class);
+    }
+
+    // ===
+
+    public function scopeWithSubject($query)
+    {
+        return $query->join('subjects', 'subjects.id', 'scores.subject_id');
+    }
+
+    public function scopeWithCompetence($query)
+    {
+        return $query->join('competences', 'competences.id', 'scores.competence_id');
+    }
+
+    public function scopeJoinAll($query)
+    {
+        return $query->select('scores.*', 'competences.competence', 'competences.type')
+            ->join('subject_user', 'subject_user.subject_id', '=', 'scores.subject_id')
+            ->join('sub_grade_user', 'sub_grade_user.sub_grade_id', '=', 'scores.sub_grade_id')
+            ->join('competences', 'competences.id', '=', 'scores.competence_id')
+            ->addSelect([
+                'subject' => Subject::select('subject')
+                    ->whereColumn('id', 'scores.subject_id')
+                    ->limit(1),
+                'subGrade' => SubGrade::select('sub_grade')
+                    ->whereColumn('id', 'scores.sub_grade_id')
+                    ->limit(1),
+            ]);
+    }
+
+    // ===
+
+    public function build(array $request)
+    {
+        $version = session('version')->id;
+
+        array_shift($request);
+        $name = '__s_' . $version . '_' . implode('_', $request);
+
+        if (Schema::hasTable($name)) return ['status' => 'warning'];
+
+        try {
+            Schema::create($name, fn (Blueprint $table) => $this->generate($table, $request['competence']));
+
+            $insert = [
+                'name'          => $name,
+                'subject_id'    => $request['subject'],
+                'sub_grade_id'  => $request['sub_grade'],
+                'competence_id' => $request['competence'],
+                'version_id'    => $version,
+            ];
+
+            $this->create($insert);
+            return ['status' => 'success', 'name' => $name];
+        } catch (\Throwable $th) {
+            report($th);
+            Schema::dropIfExists($name);
+            return ['status' => 'error', 'message' => $th];
+        }
     }
 }

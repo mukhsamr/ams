@@ -17,18 +17,22 @@ class DatabaseSeeder extends Seeder
     {
         // Core
         $this->call([
-            GradeSeeder::class,
-            SubGradeSeeder::class,
-            ScoreColumnSeeder::class,
-            SubjectSeeder::class,
-            SpiritualSeeder::class,
-            SocialSeeder::class,
-            EkskulSeeder::class,
-            PersonalitySeeder::class,
-            VersionSeeder::class,
-
             DevSeeder::class,
+            TeacherSeeder::class,
             UserSeeder::class,
+
+            SchoolSeeder::class,
+            VersionSeeder::class,
+            ScoreColumnSeeder::class,
+            AttendanceSettingSeeder::class,
+            RaportSeeder::class,
+            // GradeSeeder::class,
+            // SubGradeSeeder::class,
+            // SubjectSeeder::class,
+            // SpiritualSeeder::class,
+            // SocialSeeder::class,
+            // EkskulSeeder::class,
+            // PersonalitySeeder::class,
         ]);
 
         // // User

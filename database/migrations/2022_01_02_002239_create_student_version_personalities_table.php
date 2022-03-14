@@ -18,6 +18,7 @@ class CreateStudentVersionPersonalitiesTable extends Migration
             $table->foreignId('student_version_id')->constrained('student_versions')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedInteger('personality_id');
             $table->foreign('personality_id')->references('id')->on('personalities')->onDelete('cascade')->onUpdate('cascade');
+            $table->enum('predicate', ['A', 'B', 'C', 'D'])->nullable();
         });
     }
 

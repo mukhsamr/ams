@@ -16,11 +16,12 @@ class StudentController extends Controller
     {
         $student = new Student;
         $columns = $student::getColumns();
-        $students = $request->keyword ? $student->where('nama', 'LIKE', "%$request->keyword%") : $student;
+        $students = $request->keyword ? $student->where($request->field, 'LIKE', "%$request->keyword%") : $student;
         $data = [
             'students' => $students->paginate(15)->withQueryString(),
             'fields' => array_map(fn ($v) => ucwords(str_replace('_', ' ', $v)), $columns),
             'columns' => $columns,
+            'field' => $request->field
         ];
         return view('admin.database.students.student', $data);
     }

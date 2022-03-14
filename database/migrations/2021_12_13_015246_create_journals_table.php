@@ -19,10 +19,11 @@ class CreateJournalsTable extends Migration
             $table->date('date');
             $table->unsignedInteger('subject_id');
             $table->smallInteger('tm');
-            $table->enum('jam_ke', [1, 2, 3, 4]);
+            $table->smallInteger('jam_ke');
             $table->unsignedInteger('sub_grade_id');
             $table->foreignId('competence_id')->constrained()->onDelete('restrict')->onUpdate('cascade');
             $table->string('matter');
+            $table->boolean('is_swapped')->nullable();
             $table->unsignedInteger('version_id');
 
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('restrict')->onUpdate('cascade');

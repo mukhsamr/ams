@@ -26,4 +26,21 @@ class SubGrade extends Model
     {
         return $this->belongsTo(Grade::class);
     }
+
+    public function studentVersion()
+    {
+        return $this->hasMany(StudentVersion::class);
+    }
+
+    // ===
+
+    public function scopeWithUser($query, $user_id)
+    {
+        return $query->addSelect([
+            'user_id' => SubGradeUser::select('user_id')
+                ->whereColumn('sub_grade_user.sub_grade_id', 'sub_grades.id')
+                ->where('sub_grade_user.user_id', $user_id)
+                ->limit(1),
+        ]);
+    }
 }

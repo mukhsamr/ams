@@ -12,34 +12,33 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $subject = $user->load('subject')->subject;
-        $subGrade = $user->load('subGrade')->subGrade;
+        $subject = $user->subjects;
+        $subGrade = $user->subGrades;
 
         $subjectId = $request->subject ?? $subject->first()->id ?? null;
         $subGradeId = $request->subGrade ?? $subGrade->first()->id ?? null;
-        $scores = $user->score->load('competence:id,competence,type')
+        $scores = $user->scores()
             ->where('subject_id', $subjectId)
-            ->where('sub_grade_id', $subGradeId)
-            ->sortBy(fn ($query) => $query->competence->competence . $query->competence->type);
+            ->where('sub_grade_id', $subGradeId);
 
         $finished = [];
         $recaps = [];
         $competences = [];
 
-        $students = StudentVersion::with('student:id,nama')->where('sub_grade_id', $subGradeId)->get();
+        $students = StudentVersion::withStudent()->where('sub_grade_id', $subGradeId)->get();
         foreach ($scores as $score) {
-            $nilai = $score->competence->type == 1 ? 'nilai_bc' : 'nilai_akhir';
+            $nilai = $score->type == 1 ? 'nilai_bc' : 'nilai_akhir';
 
             $lists = (new ScoreList($score->name))->get(['student_version_id', $nilai, 'keterangan']);
-            $competence = $score->competence->format_competence;
+            $competence = competence($score);
             $competences[] = $competence;
             $finished[$competence] = [
-                'success' => $lists->where('keterangan', 1)->count(),
-                'fail' => $lists->where('keterangan', 0)->count()
+                'success' => $lists->whereStrict('keterangan', 1)->count(),
+                'fail' => $lists->whereStrict('keterangan', 0)->count()
             ];
 
             foreach ($lists as $list) {
-                $recaps[$students->find($list->student_version_id)->student->nama][$competence] = [
+                $recaps[$students->find($list->student_version_id)->nama][$competence] = [
                     'nilai' => $list->$nilai,
                     'status' => $list->getRawOriginal('keterangan')
                 ];
@@ -66,10 +65,6 @@ class HomeController extends Controller
             'json' => json_encode($json),
             'competences' => $competences,
             'recaps' => $recaps,
-            'selected' => [
-                'subject' => $subjectId,
-                'subGrade' => $subGradeId
-            ]
         ];
 
         return view('teacher.homes.home', $data);

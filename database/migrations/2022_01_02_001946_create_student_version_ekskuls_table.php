@@ -18,6 +18,7 @@ class CreateStudentVersionEkskulsTable extends Migration
             $table->foreignId('student_version_id')->constrained('student_versions')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedInteger('ekskul_id');
             $table->foreign('ekskul_id')->references('id')->on('ekskuls')->onDelete('cascade')->onUpdate('cascade');
+            $table->enum('predicate', ['A', 'B', 'C', 'D'])->nullable();
         });
     }
 

@@ -9,100 +9,96 @@ use App\Models\ScoreColumn;
 use App\Models\ScoreList;
 use App\Models\StudentVersion;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class ScoreController extends Controller
 {
-    /**
-     * Display a view.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $user = auth()->user();
-        $scores = $user->score;
 
+        $scores = $user->scores();
         $data = [
-            'user' => $user->load(['subGrade.grade', 'competence.grade', 'subject']),
-            'subjects' => $scores->unique('subject_id')->load('subject'),
-            'subGrades' => $scores->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id'])->load('subGrade'),
-            'competences' => $scores->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id'] . $v['competence_id'])->load('competence')
+            'subjects' => $scores->unique('subject_id'),
+            'subGrades' => $scores->unique(fn ($v) => $v->subject_id . $v->sub_grade_id),
+            'competences' => $scores->unique(fn ($v) => $v->subject_id . $v->sub_grade_id . $v->competence_id),
         ];
         return view('teacher.scores.score', $data);
     }
 
-    /**
-     * Build table score.
-     * Store a newly created resource in scores.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    public function create()
+    {
+        $user = auth()->user();
+        return view('teacher.scores.modal-create', [
+            'subjects' => $user->subjects,
+            'subGrades' => $user->subGrades,
+            'competences' => $user->competences
+        ]);
+    }
     public function build(ScoreRequest $request)
     {
         $build = (new Score)->build($request->toArray());
 
         if ($build['status'] === 'success') {
-            foreach (StudentVersion::where('sub_grade_id', $request->sub_grade)->pluck('id') as $id) {
-                $insert[] = DB::table($build['table'])->insert(['student_version_id' => $id]);
-            }
+            $score = new ScoreList($build['name']);
+            $students = StudentVersion::where('sub_grade_id', $request->sub_grade)->pluck('id')->toArray();
+            $score->insert(array_map(fn ($v) => ['student_version_id' => $v], $students));
+
+            $session = [
+                'subject_id'    => $request->subject,
+                'sub_grade_id'  => $request->sub_grade,
+                'competence_id' => $request->competence,
+            ];
+            session()->put($session);
+
             $alert['type'] = 'success';
         } elseif ($build['status'] === 'warning') {
-            $alert['type'] = 'warning';
+            return back()->withErrors(['Nilai sudah ada']);
         } else {
             $alert['type'] = 'danger';
         }
 
         $alert['message'] = 'membuat nilai';
-
         return back()->with('alert', $alert);
     }
 
-    /**
-     * Search list of table.
-     * Set session table
-     *
-     * @param  \Illuminate\Http\Request  $request
-     */
     public function search(Request $request)
     {
-        $table = Score::where([
+        $prev = url()->previous();
+        $role = Str::after($prev, url('/') . '/');
+
+        $table = Score::firstWhere([
             'subject_id'    => $request->subject,
             'sub_grade_id'  => $request->sub_grade,
             'competence_id' => $request->competence,
-        ])->first();
+        ]);
 
-        $prev = url()->previous();
-        $role = Str::after($prev, url('/') . '/');
         if ($table) session()->put([
             $role => $table,
-            'score_' . $role => $prev,
+            'score_' . $role => $prev
         ]);
 
         return back();
     }
 
-    /**
-     * Show table by ajax.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     */
     public function show(Request $request)
     {
-        $scores = Score::with(['subject', 'subGrade', 'competence'])->where('name', $request->name)->first();
-        $scoreList = new ScoreList($request->name);
-        $lists = $scoreList->get();
+        $scores = Score::with([
+            'subject:id,subject',
+            'subGrade:id,sub_grade,name',
+            'competence'
+        ])->firstWhere('name', $request->name);
+
+        $lists = new ScoreList($request->name);
 
         $type = $scores->competence->type;
         $fields = Schema::getColumnListing($request->name);
         $data = [
             'scores'    => $scores,
-            'lists'     => $lists->load(['studentVersion.student'])->sortBy(fn ($q) => $q->studentVersion->student->nama),
+            'students'  => $lists->withStudents($request->name)->get(),
             'fields'    => array_slice($fields, 2),
-            'fieldsScore'   => $scoreList->getFieldsScore($type, $fields),
+            'fieldsScore'   => $lists->getFieldsScore($type, $fields),
             'scoreColumns'  => ScoreColumn::getNameOnly($type),
             'name'  => $request->name,
             'type'  => $type,
@@ -113,33 +109,20 @@ class ScoreController extends Controller
         return view('teacher.scores.table', $data);
     }
 
-    /**
-     * Show the table for editing.
-     * By ajax
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Request $request)
     {
         $field = $request->index ? $request->column . '_' . $request->index : $request->column;
 
         $table = $request->table;
         $data = [
-            'table' => $request->table,
+            'table' => $table,
             'field' => $field,
-            'scores' => (new ScoreList($table))->getColumn($field)->load('studentVersion.student')->sortBy(fn ($q) => $q->studentVersion->student->nama),
+            'scores' => (new ScoreList($table))->withStudents($request->name)->get(),
             'type' => $request->type
         ];
         return view('teacher.scores.table-edit', $data);
     }
 
-    /**
-     * Update scores.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request)
     {
         $table = new ScoreList($request->table);
@@ -153,12 +136,6 @@ class ScoreController extends Controller
         return back()->with('alert', $alert);
     }
 
-    /**
-     * Remove column
-     * 
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function remove(Request $request)
     {
         $scoreList = new ScoreList($request->table);
@@ -170,19 +147,13 @@ class ScoreController extends Controller
         return back()->with('alert', $alert);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  string  $table
-     * @return \Illuminate\Http\Response
-     */
     public function drop($table)
     {
         $drop = ScoreList::dropTable($table);
         if ($drop) {
             try {
                 Score::where('name', $table)->delete();
-                session()->forget('table');
+                session()->forget(['subject_id', 'sub_grade_id', 'competence_id']);
                 $delete = true;
             } catch (\Exception $e) {
                 report($e);
@@ -201,8 +172,9 @@ class ScoreController extends Controller
 
     public function check(Request $request, $table)
     {
+        $students = array_map(fn ($v) => ['student_version_id' => $v], $request->student_id);
         try {
-            (new ScoreList($table))->setTable($table)->insert(array_map(fn ($v) => ['student_version_id' => $v], $request->student_id));
+            (new ScoreList($table))->insert($students);
             $alert['type'] = 'success';
         } catch (\Throwable $e) {
             report($e);

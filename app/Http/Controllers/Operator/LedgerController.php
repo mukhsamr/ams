@@ -9,10 +9,10 @@ class LedgerController extends Controller
 {
     public function index()
     {
-        $score = Score::all();
+        $scores = Score::joinAll()->get();
         $data = [
-            'subjects' => $score->unique('subject_id'),
-            'subGrades' => $score->unique(fn ($v) => $v['subject_id'] . $v['sub_grade_id']),
+            'subjects' => $scores->unique('subject_id'),
+            'subGrades' => $scores->unique(fn ($v) => $v->subject_id . $v->sub_grade_id),
         ];
 
         return view('operator.ledgers.ledger', $data);

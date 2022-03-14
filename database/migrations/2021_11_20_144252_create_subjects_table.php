@@ -17,8 +17,8 @@ class CreateSubjectsTable extends Migration
             $table->increments('id');
             $table->string('subject')->unique();
             $table->string('english');
-            $table->boolean('raport');
-            $table->boolean('local_content');
+            $table->boolean('raport')->nullable();
+            $table->boolean('local_content')->nullable();
             $table->timestamps();
         });
     }

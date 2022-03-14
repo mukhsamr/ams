@@ -16,11 +16,12 @@ class TeacherController extends Controller
     {
         $teacher = new Teacher;
         $columns = $teacher::getColumns();
-        $teachers = $request->keyword ? $teacher->where('nama', 'LIKE', "%$request->keyword%") : $teacher;
+        $teachers = $request->keyword ? $teacher->where($request->field, 'LIKE', "%$request->keyword%") : $teacher;
         $data = [
             'teachers' => $teachers->paginate(15)->withQueryString(),
             'fields' => array_map(fn ($v) => ucwords(str_replace('_', ' ', $v)), $columns),
             'columns' => $columns,
+            'field' => $request->field
         ];
         return view('admin.database.teachers.teacher', $data);
     }

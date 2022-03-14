@@ -36,8 +36,8 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     public function rules(): array
     {
         return [
-            '*.nipd' => "unique:students,nipd",
-            '*.nisn' => "unique:students,nisn",
+            '*.nipd' => "required|unique:students,nipd",
+            '*.nisn' => "required|unique:students,nisn",
         ];
     }
 
@@ -45,16 +45,20 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     {
         ++$this->total;
 
-        $data['tanggal_lahir'] = $this->transformDate($data['tanggal_lahir'])->toDateString();
+        $data['tanggal_lahir'] = $data['tanggal_lahir'] ? $this->transformDate($data['tanggal_lahir']) : null;
         return $data;
     }
 
     public function transformDate($value, $format = 'Y-m-d')
     {
         try {
-            return Carbon::instance(Date::excelToDateTimeObject($value));
+            return Carbon::instance(Date::excelToDateTimeObject($value))->toDateString();
         } catch (\ErrorException $e) {
-            return Carbon::createFromFormat($format, $value);
+            try {
+                return Carbon::createFromFormat($format, $value)->toDateString();
+            } catch (\Throwable $th) {
+                return null;
+            }
         }
     }
 
@@ -63,6 +67,8 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         return [
             'nipd.unique' => ':attribute sudah ada.',
             'nisn.unique' => ':attribute sudah ada.',
+            'nipd.required' => ':attribute harus diisi.',
+            'nisn.required' => ':attribute harus diisi.',
         ];
     }
 

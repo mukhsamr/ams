@@ -21,19 +21,43 @@ class StudentSocial extends Model
         return $this->belongsTo(Social::class);
     }
 
-    public function scopeGetSocials($query, $subGrade)
+    public function scopeWithStudent($query)
     {
-        return $query
-            ->with([
-                'studentVersion:id,student_id',
-                'studentVersion.student:id,nama',
-                'studentVersion.social',
-                'social'
-            ])->whereRelation(
-                'studentVersion',
-                'sub_grade_id',
-                $subGrade->id
-            )->get()->sortBy(fn ($q) => $q->studentVersion->student->nama);
+        return $query->addSelect([
+            'student_id' => StudentVersion::select('student_id')
+                ->whereColumn('id', 'student_socials.student_version_id')
+                ->limit(1),
+            'nama' => Student::select('nama')
+                ->whereColumn('id', 'student_id')
+                ->limit(1),
+        ]);
+    }
+
+    public function scopeWithSocial($query)
+    {
+        return $query->addSelect([
+            'social' => Social::select('list')
+                ->whereColumn('id', 'student_socials.social_id')
+                ->limit(1),
+        ]);
+    }
+
+    public function scopeWithSocials($query)
+    {
+        return $query->addSelect([
+            'socials' => Social::selectRaw("GROUP_CONCAT(list SEPARATOR ',')")
+                ->whereHas('studentVersions', function ($query) {
+                    return $query->whereColumn('student_versions.id', 'student_socials.student_version_id');
+                })
+                ->limit(1),
+        ]);
+    }
+
+    public function scopeWithCalled($query)
+    {
+        $query->addSelect([
+            'called' => Note::select('called')->limit(1),
+        ]);
     }
 
     public static function getComment($always, $done)

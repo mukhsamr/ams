@@ -18,6 +18,8 @@ class VersionScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $builder->where('version_id', session('version')->id ?? Version::firstWhere('is_used', 1)->id);
+        $column = $model->getTable() . '.version_id';
+        $version = session('version')->id ?? Version::firstWhere('is_used', 1)->id;
+        $builder->where($column, $version)->orWhere($column, null);
     }
 }

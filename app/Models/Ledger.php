@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Traits\LedgerTrait;
+use App\Scopes\VersionScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,6 +16,11 @@ class Ledger extends Model
 
     protected $guarded = ['id'];
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new VersionScope);
+    }
+
     public function subGrade()
     {
         return $this->belongsTo(SubGrade::class);
@@ -25,11 +31,33 @@ class Ledger extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    // ===
+
+    public function scopeWithSubject($query)
+    {
+        return $query->addSelect([
+            'subject' => Subject::select('subject')
+                ->whereColumn('id', 'subject_id')
+                ->limit(1)
+        ]);
+    }
+
+    public function scopeWithKKM($query)
+    {
+        $query->addSelect([
+            'kkm' => Competence::selectRaw('AVG(kkm) as avg')
+                ->whereColumn('subject_id', 'ledgers.subject_id')
+                ->whereColumn('type', 'ledgers.type'),
+        ]);
+    }
+
+    // ===
     public function build(array $request)
     {
         $version = session('version')->id;
 
-        $ledger = '__l_' . $version . '_' . implode('_', $request);
+        $name = ['__l', $version, $request['subject'], $request['sub_grade'], $request['type']];
+        $ledger = implode('_', $name);
 
         if (!Schema::hasTable($ledger)) {
             try {

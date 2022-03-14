@@ -15,4 +15,14 @@ $(document).ready(function () {
         let check = prompt(`Tulis ${user} untuk konfirmasi`);
         (check === user) ? $(this).parent().submit() : alert('Konfirmasi gagal');
     });
+
+    // Placeholder filter
+    $('#field').change(function () {
+        let array = ['tanggal_lahir', 'mulai_bekerja'];
+        if (array.includes($(this).val())) {
+            $('[name = keyword]').attr('placeholder', 'yyyy-mm-dd');
+        } else {
+            $('[name = keyword]').attr('placeholder', '...');
+        };
+    });
 });

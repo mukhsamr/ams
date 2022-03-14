@@ -19,12 +19,17 @@ class Student extends Model
 
     public function getNamaAttribute($value)
     {
-        return str_replace(' ', '&nbsp;', ucwords(strtolower($value)));
+        return str_replace(' ', '&nbsp;', $value);
     }
 
     public function user()
     {
         return $this->morphOne(User::class, 'userable');
+    }
+
+    public function attendance()
+    {
+        return $this->morphOne(Attendance::class, 'userable');
     }
 
     public function studentVersion()

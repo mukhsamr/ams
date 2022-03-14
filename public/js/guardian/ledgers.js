@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
-    $('select#subject').change(() => {
-        $('select#type').val('');
+    $('#subject-search').change(() => {
+        $('#type-search').val('');
     });
 
     function showLedger() {
@@ -9,17 +9,11 @@ $(document).ready(function () {
         $('#ledgerTable').load($('#searchLedger').attr('action'), $('#searchLedger').serializeArray(), function (response, status, request) {
             $(this).slideDown(300);
             feather.replace();
-
-            $('.deskripsi').on('click', 'a', function () {
-                const cond = $(this).data('send');
-                const data = $(this).parent().data(cond);
-                $(this).parent().html(data);
-            });
         });
     }
 
     // Submit search ledgers
-    $('select#type').change(function () {
+    $('#type-search').change(function () {
         showLedger();
     });
 
